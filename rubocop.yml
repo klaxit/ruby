@@ -1,0 +1,105 @@
+# Override default Rubocop confg
+# See https://github.com/bbatsov/rubocop
+##################### Style ####################
+Documentation:
+  Enabled: false
+
+Layout/DotPosition:
+  EnforcedStyle: leading
+  SupportedStyles:
+    - leading
+    - trailing
+
+Layout/SpaceInsideHashLiteralBraces:
+  EnforcedStyle: space
+  EnforcedStyleForEmptyBraces: no_space
+  SupportedStyles:
+    - space
+    - no_space
+    # 'compact' normally requires a space inside hash braces, with the exception
+    # that successive left braces or right braces are collapsed together
+    - compact
+
+Style/HashSyntax:
+  EnforcedStyle: ruby19_no_mixed_keys
+  SupportedStyles:
+    # checks for 1.9 syntax (e.g. {a: 1}) for all symbol keys
+    - ruby19
+    # checks for hash rocket syntax for all hashes
+    - hash_rockets
+    # forbids mixed key syntaxes (e.g. {a: 1, :b => 2})
+    - no_mixed_keys
+    # enforces both ruby19 and no_mixed_keys styles
+    - ruby19_no_mixed_keys
+  # Force hashes that have a symbol value to use hash rockets
+  UseHashRocketsWithSymbolValues: false
+  # Do not suggest { a?: 1 } over { :a? => 1 } in ruby19 style
+  PreferHashRocketsForNonAlnumEndingSymbols: false
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+  SupportedStyles:
+    - single_quotes
+    - double_quotes
+  # If true, strings which span multiple lines using \ for continuation must
+  # use the same type of quotes on each line.
+  ConsistentQuotesInMultiline: true
+
+Style/StringLiteralsInInterpolation:
+  EnforcedStyle: double_quotes
+  SupportedStyles:
+    - single_quotes
+    - double_quotes
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Style/PercentLiteralDelimiters:
+  PreferredDelimiters:
+    default: '()'
+    '%i': '()'
+    '%I': '()'
+    '%r': '()'
+    '%w': '()'
+    '%W': '()'
+
+Style/ClassAndModuleChildren:
+  # Checks the style of children definitions at classes and modules.
+  #
+  # Basically there are two different styles:
+  #
+  # `nested` - have each child on a separate line
+  #   class Foo
+  #     class Bar
+  #     end
+  #   end
+  #
+  # `compact` - combine definitions as much as possible
+  #   class Foo::Bar
+  #   end
+  #
+  # The compact style is only forced, for classes or modules with one child.
+  EnforcedStyle: compact
+  SupportedStyles:
+    - nested
+    - compact
+
+##################### Metrics ####################
+
+Metrics/AbcSize:
+  # Default 15 (9999 to disable it)
+  # => cyclomatic complexity is better
+  Max: 9999
+
+Metrics/ClassLength:
+  CountComments: false  # count full line comments?
+  Max: 300
+
+Metrics/ModuleLength:
+  CountComments: false  # count full line comments?
+  Max: 300
+
+Metrics/MethodLength:
+  CountComments: false  # count full line comments?
+  Max: 20
+
