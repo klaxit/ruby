@@ -1,6 +1,6 @@
 # Override default Rubocop confg
 # See https://github.com/bbatsov/rubocop
-##################### Style ####################
+
 Documentation:
   Enabled: false
 
@@ -19,6 +19,8 @@ Layout/SpaceInsideHashLiteralBraces:
     # 'compact' normally requires a space inside hash braces, with the exception
     # that successive left braces or right braces are collapsed together
     - compact
+
+##################################### Style ####################################
 
 Style/HashSyntax:
   EnforcedStyle: ruby19_no_mixed_keys
@@ -63,6 +65,14 @@ Style/PercentLiteralDelimiters:
     '%w': '()'
     '%W': '()'
 
+Style/RedundantReturn:
+  # Allow usage of `return` keyword when it helps clarity.
+  Enabled: false
+
+Style/ReturnNil:
+  # Favor usage of `return` in stead of `return nil`
+  Enabled: true
+
 Style/ClassAndModuleChildren:
   # Checks the style of children definitions at classes and modules.
   #
@@ -84,7 +94,7 @@ Style/ClassAndModuleChildren:
     - nested
     - compact
 
-##################### Metrics ####################
+#################################### Metrics ###################################
 
 Metrics/AbcSize:
   # Default 15 (9999 to disable it)
@@ -102,4 +112,3 @@ Metrics/ModuleLength:
 Metrics/MethodLength:
   CountComments: false  # count full line comments?
   Max: 20
-
