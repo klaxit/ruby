@@ -70,8 +70,10 @@ Style/RedundantReturn:
   Enabled: false
 
 Style/ReturnNil:
-  # Favor usage of `return` in stead of `return nil`
+  # Favor usage of `return nil` in stead of `return`
   Enabled: true
+  EnforcedStyle: return_nil
+
 
 Style/ClassAndModuleChildren:
   # Checks the style of children definitions at classes and modules.
