@@ -103,6 +103,10 @@ Metrics/AbcSize:
   # => cyclomatic complexity is better
   Max: 9999
 
+Metrics/BlockLength:
+  Exclude:
+    - "spec/**/*"
+
 Metrics/ClassLength:
   CountComments: false  # count full line comments?
   Max: 300
