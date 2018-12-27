@@ -96,6 +96,10 @@ Style/ClassAndModuleChildren:
     - nested
     - compact
 
+Style/NumericPredicate:
+  # Yes, we think `> 0` is a better choice than `positive?`.
+  EnforcedStyle: comparison
+
 #################################### Metrics ###################################
 
 Metrics/AbcSize:
