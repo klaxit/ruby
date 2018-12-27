@@ -6,74 +6,14 @@ Documentation:
 
 Layout/DotPosition:
   EnforcedStyle: leading
-  SupportedStyles:
-    - leading
-    - trailing
 
 Layout/SpaceInsideHashLiteralBraces:
   EnforcedStyle: space
   EnforcedStyleForEmptyBraces: no_space
-  SupportedStyles:
-    - space
-    - no_space
-    # 'compact' normally requires a space inside hash braces, with the exception
-    # that successive left braces or right braces are collapsed together
-    - compact
 
 ##################################### Style ####################################
 
-Style/HashSyntax:
-  EnforcedStyle: ruby19_no_mixed_keys
-  SupportedStyles:
-    # checks for 1.9 syntax (e.g. {a: 1}) for all symbol keys
-    - ruby19
-    # checks for hash rocket syntax for all hashes
-    - hash_rockets
-    # forbids mixed key syntaxes (e.g. {a: 1, :b => 2})
-    - no_mixed_keys
-    # enforces both ruby19 and no_mixed_keys styles
-    - ruby19_no_mixed_keys
-  # Force hashes that have a symbol value to use hash rockets
-  UseHashRocketsWithSymbolValues: false
-  # Do not suggest { a?: 1 } over { :a? => 1 } in ruby19 style
-  PreferHashRocketsForNonAlnumEndingSymbols: false
-
-Style/StringLiterals:
-  EnforcedStyle: double_quotes
-  SupportedStyles:
-    - single_quotes
-    - double_quotes
-  # If true, strings which span multiple lines using \ for continuation must
-  # use the same type of quotes on each line.
-  ConsistentQuotesInMultiline: true
-
-Style/StringLiteralsInInterpolation:
-  EnforcedStyle: double_quotes
-  SupportedStyles:
-    - single_quotes
-    - double_quotes
-
-Style/FrozenStringLiteralComment:
-  Enabled: false
-
-Style/PercentLiteralDelimiters:
-  PreferredDelimiters:
-    default: '()'
-    '%i': '()'
-    '%I': '()'
-    '%r': '()'
-    '%w': '()'
-    '%W': '()'
-
-Style/RedundantReturn:
-  # Allow usage of `return` keyword when it helps clarity.
-  Enabled: false
-
-Style/ReturnNil:
-  # Favor usage of `return nil` in stead of `return`
-  Enabled: true
-  EnforcedStyle: return_nil
-
+# Please keep rules in alphabetical order...
 
 Style/ClassAndModuleChildren:
   # Checks the style of children definitions at classes and modules.
@@ -92,15 +32,59 @@ Style/ClassAndModuleChildren:
   #
   # The compact style is only forced, for classes or modules with one child.
   EnforcedStyle: compact
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Style/HashSyntax:
+  EnforcedStyle: ruby19_no_mixed_keys
   SupportedStyles:
-    - nested
-    - compact
+    # checks for 1.9 syntax (e.g. {a: 1}) for all symbol keys
+    - ruby19
+    # checks for hash rocket syntax for all hashes
+    - hash_rockets
+    # forbids mixed key syntaxes (e.g. {a: 1, :b => 2})
+    - no_mixed_keys
+    # enforces both ruby19 and no_mixed_keys styles
+    - ruby19_no_mixed_keys
+  # Force hashes that have a symbol value to use hash rockets
+  UseHashRocketsWithSymbolValues: false
+  # Do not suggest { a?: 1 } over { :a? => 1 } in ruby19 style
+  PreferHashRocketsForNonAlnumEndingSymbols: false
 
 Style/NumericPredicate:
-  # Yes, we think `> 0` is a better choice than `positive?`.
+  # Disabled : depending on the context, we think it's a good thing
+  # to have the choice between `> 0` and `positive?`.
   EnforcedStyle: comparison
 
+Style/PercentLiteralDelimiters:
+  # Why do we need different delimiters ?!
+  # Always use the `()` delimiter
+  PreferredDelimiters:
+    default: '()'
+    '%i': '()'
+    '%I': '()'
+    '%r': '()'
+    '%w': '()'
+    '%W': '()'
+
+Style/RedundantReturn:
+  # Allow usage of `return` keyword when it helps clarity.
+  Enabled: false
+
+Style/ReturnNil:
+  # Favor usage of `return nil` in stead of `return`
+  EnforcedStyle: return_nil
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+  # If true, strings which span multiple lines using \ for continuation must
+  # use the same type of quotes on each line.
+  ConsistentQuotesInMultiline: true
+
 #################################### Metrics ###################################
+
+# Please keep rules in alphabetical order...
 
 Metrics/AbcSize:
   # Default 15 (9999 to disable it)
