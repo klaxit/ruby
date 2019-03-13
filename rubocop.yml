@@ -30,8 +30,8 @@ Style/ClassAndModuleChildren:
   #   class Foo::Bar
   #   end
   #
-  # The compact style is only forced, for classes or modules with one child.
-  EnforcedStyle: compact
+  # There are good reasons to use both, do not enforce this style.
+  Enabled: false
 
 Style/FrozenStringLiteralComment:
   Enabled: false
