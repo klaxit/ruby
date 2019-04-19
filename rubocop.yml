@@ -82,6 +82,14 @@ Style/StringLiterals:
   # use the same type of quotes on each line.
   ConsistentQuotesInMultiline: true
 
+# Since we always want to enforce double quotes, having single quotes on such
+# places feels weird:
+# 
+#   "Hello, #{APP_CONFIG['little_world']"
+#
+Style/StringLiteralsInInterpolation:
+  EnforcedStyle: double_quotes
+
 #################################### Metrics ###################################
 
 # Please keep rules in alphabetical order...
