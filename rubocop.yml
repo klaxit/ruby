@@ -10,6 +10,22 @@ Layout/DotPosition:
     - leading
     - trailing
 
+Layout/EmptyLineAfterGuardClause:
+  # We disable this rule to allow each developer
+  # to choose the appropriate style.
+  #
+  # For example, the following example couldn't reach
+  # a consensus :
+  #
+  # odds = []
+  # 10.times.each do |i|
+  #   next if i % 2 == 0
+  #
+  #   odds << i
+  # end
+  #
+  Enabled: false
+
 Layout/SpaceInsideHashLiteralBraces:
   EnforcedStyle: space
   EnforcedStyleForEmptyBraces: no_space
