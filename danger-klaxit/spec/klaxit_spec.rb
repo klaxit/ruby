@@ -131,6 +131,18 @@ module Danger
           end
           it { should contain_exactly "Fizz.noop" }
         end
+        context "when there is no class" do
+          let(:file_content) do
+            <<~RUBY
+              ActiveAdmin.register do
+                def i_m_a_method
+                  "hello little world"
+                end
+              end
+            RUBY
+          end
+          it { should be_empty }
+        end
         context "when setting `self.` method as private" do
           let(:file_content) do
             <<~RUBY

@@ -138,9 +138,10 @@ class Danger::DangerKlaxit < Danger::Plugin
       return public_methods_for_class_or_module(ast).values
     end
 
-    unless is_begin[ast]
-      raise ArgumentError, "Unable to parse file starting with #{ast.type}"
-    end
+    # This case happens when there is no class definition, for instance within
+    # an ActiveAdmin view file. Since we do not need tests for these kind of
+    # files, we return an empty array.
+    return [] unless is_begin[ast]
 
     ast.children
        .select(&is_class_or_module)
