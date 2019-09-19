@@ -1,9 +1,9 @@
 PATH
   remote: .
   specs:
-    danger-klaxit (0.0.2)
+    danger-klaxit (0.1.0)
       danger-plugin-api (~> 1.0)
-      danger-rubocop (~> 0.6)
+      danger-rubocop (~> 0.7)
       parser (~> 2.6.0)
 
 GEM
@@ -36,7 +36,7 @@ GEM
       terminal-table (~> 1)
     danger-plugin-api (1.0.0)
       danger (> 2.0)
-    danger-rubocop (0.6.1)
+    danger-rubocop (0.7.0)
       danger
       rubocop
     diff-lcs (1.3)

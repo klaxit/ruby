@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency "danger-plugin-api", "~> 1.0"
 
-  spec.add_runtime_dependency "danger-rubocop", "~> 0.6"
+  spec.add_runtime_dependency "danger-rubocop", "~> 0.7"
   # Parser version is specified to 2.6.0 to facilitate a migration to Ruby 2.6.
   # Moreover, a lot of Gems need this version, hence we improve compatibility
   spec.add_runtime_dependency "parser", "~> 2.6.0"

@@ -21,7 +21,8 @@ class Danger::DangerKlaxit < Danger::Plugin
   def warn_rubocop
     rubocop.lint(files: git.modified_files + git.added_files,
                  inline_comment: true,
-                 force_exclusion: true)
+                 force_exclusion: true,
+                 only_report_new_offenses: true)
   end
 
   # Inspects commit messages to stop someone from merging until the committer
