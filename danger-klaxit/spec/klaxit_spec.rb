@@ -178,6 +178,27 @@ module Danger
           it { should contain_exactly "Buzz.pub" }
         end
       end
+
+      describe "#new_ruby_files_excluding_spec_and_rubocop" do
+        before do
+          allow(@plugin).to receive(:new_ruby_files_excluding_spec) do
+            %W(db/migrate/mimimi.rb #{Dir.pwd}/script/rm_rf_slash.rb app/good.rb)
+          end
+
+          FileUtils.mv(".rubocop.yml", ".rubocop.yml.copy")
+          IO.write(".rubocop.yml", <<~YAML)
+            AllCops:
+              Exclude:
+                - db/**/*
+                - script/**/*
+          YAML
+        end
+        after do
+          FileUtils.mv(".rubocop.yml.copy", ".rubocop.yml")
+        end
+        subject { @plugin.send(:new_ruby_files_excluding_spec_and_rubocop) }
+        it { should contain_exactly "app/good.rb" }
+      end
     end
   end
 end

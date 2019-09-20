@@ -78,19 +78,29 @@ class Danger::DangerKlaxit < Danger::Plugin
       (git.modified_files + git.added_files).grep(/\.rb$/).grep_v(/^spec/)
   end
 
+  def new_ruby_files_excluding_spec_and_rubocop
+    @new_ruby_files_excluding_spec_and_rubocop ||=
+      begin
+        require "rubocop"
+        rubocop_config = RuboCop::ConfigStore.new.for(".")
+        new_ruby_files_excluding_spec
+          .reject { |file| rubocop_config.file_to_exclude?(file) }
+      end
+  end
+
   # @return Hash<String, MethodDetails>
   def new_public_methods_by_ruby_file
     return @new_public_methods_by_ruby_file if @new_public_methods_by_ruby_file
 
     # DEBUG: show new ruby files
-    # dbg_data = new_ruby_files_excluding_spec * ?,
-    # puts "new_ruby_files_excluding_spec: #{dbg_data}"
+    # dbg_data = new_ruby_files_excluding_spec_and_rubocop * ?,
+    # puts "new_ruby_files_excluding_spec_and_rubocop: #{dbg_data}"
 
     # https://regex101.com/r/xLymHd
     new_method_regex = /^\+\s+def \b(?:self\.)?([^(\s]+).*/
     new_methods_by_file =
-      new_ruby_files_excluding_spec.each_with_object({}) do |file, hash|
-        methods = git.diff_for_file(file)
+      new_ruby_files_excluding_spec_and_rubocop.each_with_object({}) do |f, h|
+        methods = git.diff_for_file(f)
                      .patch
                      .split("\n")
                      .map { |line| line[new_method_regex, 1]&.to_sym }
@@ -98,7 +108,7 @@ class Danger::DangerKlaxit < Danger::Plugin
                      .tap { |set| set.delete(nil) }
                      .tap { |set| set.delete(:initialize) }
         #            ^ Specs don't contain #initialize
-        hash[file] = methods unless methods.empty?
+        h[f] = methods unless methods.empty?
       end
 
     # DEBUG
