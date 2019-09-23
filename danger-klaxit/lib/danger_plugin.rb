@@ -179,7 +179,7 @@ class Danger::DangerKlaxit < Danger::Plugin
     # We do not handle `self.` within sclass (`class << self`) nor nested
     # sclass since it would be bad practif anyway.
     # See https://stackoverflow.com/q/57570175/6320039.
-    ast_node.children.last.children.each do |sub_node|
+    children_for_node(ast_node).each do |sub_node|
       break if sub_node.type == :send && sub_node.children[1] == :private
       next if sub_node.type != :def
 

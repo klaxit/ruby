@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    danger-klaxit (0.1.0)
+    danger-klaxit (0.1.2)
       danger-plugin-api (~> 1.0)
       danger-rubocop (~> 0.7)
       parser (~> 2.6.0)
