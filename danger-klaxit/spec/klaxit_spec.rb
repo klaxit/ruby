@@ -82,6 +82,19 @@ module Danger
           @plugin.send(:public_methods_for_file, file_content).map(&:to_s)
         end
         it { should contain_exactly "Foo#some_method" }
+        context "when there is only one class method" do
+          let(:file_content) do
+            <<~RUBY
+              class Foo
+                class << self
+                  def create
+                  end
+                end
+              end
+            RUBY
+          end
+          it { should contain_exactly "Foo.create" }
+        end
         context "with nested modules and classes" do
           let(:file_content) do
             <<~RUBY
