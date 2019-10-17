@@ -1,9 +1,6 @@
 # Override default Rubocop confg
 # See https://github.com/bbatsov/rubocop
 
-Documentation:
-  Enabled: false
-
 Layout/DotPosition:
   EnforcedStyle: leading
 
@@ -47,6 +44,9 @@ Style/ClassAndModuleChildren:
   #   end
   #
   # There are good reasons to use both, do not enforce this style.
+  Enabled: false
+
+Style/Documentation:
   Enabled: false
 
 Style/FrozenStringLiteralComment:
