@@ -49,9 +49,6 @@ Style/ClassAndModuleChildren:
 Style/Documentation:
   Enabled: false
 
-Style/FrozenStringLiteralComment:
-  Enabled: false
-
 Style/HashSyntax:
   EnforcedStyle: ruby19_no_mixed_keys
   SupportedStyles:
