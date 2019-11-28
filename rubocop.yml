@@ -68,6 +68,10 @@ Style/HashSyntax:
   # Do not suggest { a?: 1 } over { :a? => 1 } in ruby19 style
   PreferHashRocketsForNonAlnumEndingSymbols: false
 
+# Do not enforce usage of `unless foo` over `if !foo`
+Style/NegatedIf:
+  Enabled: false
+
 Style/NumericPredicate:
   # Disabled : depending on the context, we think it's a good thing
   # to have the choice between `> 0` and `positive?`.
