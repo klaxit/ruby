@@ -16,6 +16,8 @@ under the `klaxit` namespace. For starters, you could use:
 klaxit.common
 ```
 
+Dont forget to also [add danger to your CI][doc-danger-ci]!
+
 ## Available methods
 
 - **klaxit.warn_rubocop** — will write inline rubocop comments
@@ -29,3 +31,4 @@ klaxit.common
 
 [//]: #--------------------------------------------------- (external references)
 [git-rebase]: https://git-scm.com/docs/git-rebase#Documentation/git-rebase.txt---autostash
+[doc-danger-ci]: https://danger.systems/guides/getting_started.html#setting-up-danger-to-run-on-your-ci
