@@ -131,3 +131,7 @@ Metrics/ModuleLength:
 Metrics/MethodLength:
   CountComments: false  # count full line comments?
   Max: 20
+
+require:
+  - ./lib/rubocop/cop/active_record/bang.rb
+  - ./lib/rubocop/cop/active_record/update_attribute.rb
