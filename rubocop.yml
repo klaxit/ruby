@@ -133,5 +133,5 @@ Metrics/MethodLength:
   Max: 20
 
 require:
-  - ./lib/rubocop/cop/active_record/bang.rb
-  - ./lib/rubocop/cop/active_record/update_attribute.rb
+  - ./rubocop/cop/active_record/bang.rb
+  - ./rubocop/cop/active_record/update_attribute.rb

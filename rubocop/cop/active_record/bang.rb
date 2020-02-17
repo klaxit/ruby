@@ -5,7 +5,7 @@ module RuboCop
     module ActiveRecord
       class Bang < RuboCop::Cop::Cop
         PATTERN = "(send _ #bang_method? ...)"
-        
+
         METHODS = {
           update_attributes: "{lvar hash}",
           update: "{lvar hash}",
@@ -26,7 +26,7 @@ module RuboCop
         end.to_h.freeze
 
         MSG = "Prefer the use of the bang method '%s!'. " \
-              "Exceptions are our friends !"
+              "Exceptions are our friends!"
 
         def_node_matcher :bangable_method?, PATTERN
 
