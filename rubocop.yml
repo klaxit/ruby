@@ -1,5 +1,7 @@
 # Override default Rubocop confg
 # See https://github.com/bbatsov/rubocop
+require:
+  - ./rubocop/rubocop
 
 Layout/DotPosition:
   EnforcedStyle: leading
@@ -101,7 +103,7 @@ Style/StringLiterals:
 
 # Since we always want to enforce double quotes, having single quotes on such
 # places feels weird:
-# 
+#
 #   "Hello, #{APP_CONFIG['little_world']"
 #
 Style/StringLiteralsInInterpolation:
