@@ -56,6 +56,7 @@ class Danger::DangerKlaxit < Danger::Plugin
     spec_regex = /describe "([#.][^"]+)"/
 
     new_public_methods_by_ruby_file.each do |file, method_details|
+      file = new_name_for_file(file)
       spec_file = "spec/" + file.sub(".rb", "_spec.rb").sub("app/", "")
       next warn("No spec found for file #{file}.") unless File.exist?(spec_file)
 
@@ -74,8 +75,20 @@ class Danger::DangerKlaxit < Danger::Plugin
   private
 
   def new_ruby_files_excluding_spec
-    @new_ruby_files_excluding_spec ||=
-      (git.modified_files + git.added_files).grep(/\.rb$/).grep_v(/^spec/)
+    @new_ruby_files_excluding_spec ||= begin
+      (git.modified_files + git.added_files)
+        .grep(/\.rb$/)
+        .grep_v(/^spec/)
+    end
+  end
+
+  def new_name_for_file(file)
+    @new_name_for_file ||= begin
+      renamed = git.renamed_files.map { |h| [h[:before], h[:after]] }.to_h
+      renamed.default_proc = ->(_, key) { key }
+      renamed
+    end
+    @new_name_for_file[file]
   end
 
   def new_ruby_files_excluding_spec_and_rubocop
@@ -116,7 +129,7 @@ class Danger::DangerKlaxit < Danger::Plugin
     #      JSON.pretty_generate(new_methods_by_file.transform_values(&:to_a))
     @new_public_methods_by_ruby_file =
       new_methods_by_file.each_with_object({}) do |(file, names), hash|
-        public_methods = public_methods_for_file(IO.read(file))
+        public_methods = public_methods_for_file(IO.read(new_name_for_file(file)))
                          .select { |details| names.member?(details.name) }
         hash[file] = public_methods unless public_methods.empty?
       end
