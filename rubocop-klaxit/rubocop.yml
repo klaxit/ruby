@@ -1,0 +1,5 @@
+# Override default Rubocop confg
+# See https://github.com/bbatsov/rubocop
+require: ./rubocop
+
+inherit_from: ../rubocop.yml

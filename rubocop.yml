@@ -1,7 +1,5 @@
 # Override default Rubocop confg
 # See https://github.com/bbatsov/rubocop
-require:
-  - ./rubocop/rubocop
 
 Layout/DotPosition:
   EnforcedStyle: leading

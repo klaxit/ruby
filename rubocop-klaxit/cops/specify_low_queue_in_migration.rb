@@ -10,7 +10,6 @@ module RuboCop
 
       def on_send(node)
         return nil unless in_migration?(node)
-        #  || sidekiq_push?(node)
         return unless sidekiq_called?(node)
         return if low_queue_specify?(node)
 
@@ -31,8 +30,7 @@ module RuboCop
 
       def in_migration?(node)
         dirname = File.dirname(node.location.expression.source_buffer.name)
-        dirname.end_with?("db/migrate", "db/geo/migrate") ||
-          in_post_deployment_migration?(node)
+        dirname.end_with?("db/migrate")
       end
 
       def_node_matcher :worker_called?, <<~PATTERN
