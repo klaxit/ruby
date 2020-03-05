@@ -49,6 +49,9 @@ Style/ClassAndModuleChildren:
 Style/Documentation:
   Enabled: false
 
+Style/DocumentationMethod:
+  Enabled: true
+
 Style/HashSyntax:
   EnforcedStyle: ruby19_no_mixed_keys
   SupportedStyles:
@@ -101,7 +104,7 @@ Style/StringLiterals:
 
 # Since we always want to enforce double quotes, having single quotes on such
 # places feels weird:
-# 
+#
 #   "Hello, #{APP_CONFIG['little_world']"
 #
 Style/StringLiteralsInInterpolation:
