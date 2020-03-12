@@ -3,7 +3,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require "gem_version"
 
 Gem::Specification.new do |spec|
-  spec.name          = "ruby-klaxit"
+  spec.name          = "rubocop-klaxit"
   spec.version       = Klaxit::VERSION
   spec.authors       = ["Hugo BARTHELEMY"]
   spec.email         = ["dev@klaxit.com"]
