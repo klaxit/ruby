@@ -1,10 +1,10 @@
 lib = File.expand_path("lib", __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require "gem_version"
+require "klaxit/rubocop/gem_version"
 
 Gem::Specification.new do |spec|
   spec.name          = "rubocop-klaxit"
-  spec.version       = Klaxit::VERSION
+  spec.version       = Klaxit::Rubocop::VERSION
   spec.authors       = ["Hugo BARTHELEMY"]
   spec.email         = ["dev@klaxit.com"]
   spec.summary       = "Ruby rules for Klaxit projects."

@@ -1,10 +1,12 @@
+# frozen_string_literal: true
+
 lib = File.expand_path("lib", __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require "klaxit/gem_version"
+require "klaxit/danger/gem_version"
 
 Gem::Specification.new do |spec|
   spec.name          = "danger-klaxit"
-  spec.version       = Klaxit::VERSION
+  spec.version       = Klaxit::Danger::VERSION
   spec.authors       = ["Ulysse Buonomo"]
   spec.email         = ["dev@klaxit.com"]
   spec.summary       = "Danger for Klaxit projects."
