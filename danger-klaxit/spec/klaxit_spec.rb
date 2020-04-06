@@ -13,7 +13,6 @@ module Danger
       before do
         @dangerfile = testing_dangerfile
         @plugin = @dangerfile.klaxit
-
       end
 
       describe "#fail_for_bad_commits" do
@@ -192,6 +191,22 @@ module Danger
         end
       end
 
+      describe "#run_brakeman_scanner" do
+        around do |example|
+          Dir.chdir("#{__dir__}/support/fixtures/klaxit-example-app", &example)
+        end
+        it "runs brakeman with correct arguments" do
+          allow(@plugin).to receive(:github_repo) { "klaxit/klaxit-example-app" }
+          brakeman_scanner = double
+          expect(@dangerfile).to receive(:brakeman_scanner) { brakeman_scanner }
+          expect(brakeman_scanner).to receive(:run).with(
+            app_path: ".",
+            github_repo: "klaxit/klaxit-example-app"
+          )
+          @plugin.run_brakeman_scanner
+        end
+      end
+
       describe "#new_ruby_files_excluding_spec_and_rubocop" do
         before do
           allow(@plugin).to receive(:new_ruby_files_excluding_spec) do
@@ -211,6 +226,24 @@ module Danger
         end
         subject { @plugin.send(:new_ruby_files_excluding_spec_and_rubocop) }
         it { should contain_exactly "app/good.rb" }
+      end
+
+      describe "#github_repo" do
+        it "gives info" do
+          allow(@dangerfile.github).to receive(:html_link).with("") {
+            "<a href='https://github.com/klaxit/klaxit-matcher/blob/5308f9c088370fd08aeb157f45db181d77d850f7/'></a>"
+          }
+          expect(@plugin.send(:github_repo)).to eq "klaxit/klaxit-matcher"
+        end
+      end
+
+      describe "#rails_like_project?" do
+        it "detect rails app" do
+          Dir.chdir("#{__dir__}/support/fixtures/klaxit-example-app") do
+            expect(@plugin.send(:rails_like_project?)).to be true
+          end
+          expect(@plugin.send(:rails_like_project?)).to be false
+        end
       end
     end
   end

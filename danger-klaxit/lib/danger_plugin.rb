@@ -16,6 +16,7 @@ class Danger::DangerKlaxit < Danger::Plugin
     fail_for_bad_commits
     warn_for_public_methods_without_specs
     warn_rubocop
+    run_brakeman_scanner if rails_like_project?
   end
 
   def warn_rubocop
@@ -50,6 +51,14 @@ class Danger::DangerKlaxit < Danger::Plugin
     nil
   end
 
+  # Start a scan using `danger-brakeman_scanner`. Arguments are deduced from
+  # the current path, and klaxit naming conventions (i.e `klaxit-<name>`).
+  def run_brakeman_scanner
+    configs = { app_path: "." }
+    configs.merge!(github_repo: "#{github_repo}") if github_repo
+    brakeman_scanner.run(configs)
+  end
+
   def warn_for_public_methods_without_specs
     return failure("`spec` directory is missing") unless Dir.exist?("spec")
 
@@ -80,6 +89,19 @@ class Danger::DangerKlaxit < Danger::Plugin
         .grep(/\.rb$/)
         .grep_v(/^spec/)
     end
+  end
+
+  # This is sufficient is many case since gem-like projects use `lib`, `ext` but
+  # never `app` folder. And every app based project used by klaxit are Sinatra
+  # or Rails project.
+  def rails_like_project?
+    Dir.exist?("app")
+  end
+
+  def github_repo
+    github.html_link("")[%r(github.com/((?:[^/]+)/(?:[^/]+))), 1]
+  rescue
+    nil
   end
 
   def new_name_for_file(file)
