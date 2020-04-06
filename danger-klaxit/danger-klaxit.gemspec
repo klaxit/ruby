@@ -12,21 +12,24 @@ Gem::Specification.new do |spec|
   spec.summary       = "Danger for Klaxit projects."
   spec.homepage      = "https://github.com/klaxit/ruby"
   spec.license       = "MIT"
+  spec.metadata["yard.run"] = "yri" # use "yard" to build full HTML docs.
 
   spec.files         = `git ls-files`.split($INPUT_RECORD_SEPARATOR)
-  spec.executables   = spec.files.grep(%r(^bin/)) { |f| File.basename(f) }
+  spec.executables   = spec.files.grep(%r(^bin/), &File.method(:basename))
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
   spec.add_runtime_dependency "danger-plugin-api", "~> 1.0"
 
+  spec.add_runtime_dependency "danger-brakeman_scanner", "~> 0.1"
   spec.add_runtime_dependency "danger-rubocop", "~> 0.7"
+
   # Parser version is specified to 2.6.0 to facilitate a migration to Ruby 2.6.
   # Moreover, a lot of Gems need this version, hence we improve compatibility
   spec.add_runtime_dependency "parser", "~> 2.6.0"
 
   # General ruby development
-  spec.add_development_dependency "bundler", "~> 2.0.2"
+  spec.add_development_dependency "bundler", "~> 2.0"
   spec.add_development_dependency "rake", "~> 13.0"
 
   # Testing support
