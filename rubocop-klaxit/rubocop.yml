@@ -3,3 +3,7 @@
 require: ./rubocop
 
 inherit_from: ../rubocop.yml
+
+Documentation/CheckPathDocumented:
+  Include:
+    - "app/controllers/**/*"
