@@ -4,6 +4,8 @@ require: ./rubocop
 
 inherit_from: ../rubocop.yml
 
+# We only want controllers to have tag @path on every
+# public method, so we include only standard rails controller path.
 Documentation/CheckPathDocumented:
   Include:
     - "app/controllers/**/*"

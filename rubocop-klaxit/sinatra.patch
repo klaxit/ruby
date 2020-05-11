@@ -1,0 +1,57 @@
+diff --git a/rubocop-klaxit/cops/check_path_documented.rb b/rubocop-klaxit/cops/check_path_documented.rb
+index 3bd0d85..4365b89 100644
+--- a/rubocop-klaxit/cops/check_path_documented.rb
++++ b/rubocop-klaxit/cops/check_path_documented.rb
+@@ -17,6 +17,9 @@ module RuboCop
+       #     end
+       #   end
+       #
++      #   post "/login" do
++      #   end
++      #
+       #   # good
+       #
+       #   class Foo
+@@ -32,17 +35,32 @@ module RuboCop
+       #     end
+       #   end
+       #
++      #   # @path
++      #   get "/info" do
++      #   end
++      #
+       class CheckPathDocumented < Cop
+         include DocumentationComment
+         include DefNode
+ 
++        HTTP_OP = %i[:get :post :put :patch :delete :head :options].freeze
+         MSG = 'Missing swagger-yard tag @path in method documentation comment.'
+ 
++        def_node_matcher :operation_block?, <<~PATTERN
++          (block (send nil? {#{HTTP_OP.join(' ')}} ...) ...)
++        PATTERN
++
+         def on_def(node)
+           check(node)
+         end
+         alias on_defs on_def
+ 
++        def on_block(node)
++          return unless operation_block?(node)
++
++          check(node)
++        end
++
+         private
+ 
+         def documentation_comment?(node)
+diff --git a/rubocop-klaxit/rubocop.yml b/rubocop-klaxit/rubocop.yml
+index 039192c..3c779d8 100644
+--- a/rubocop-klaxit/rubocop.yml
++++ b/rubocop-klaxit/rubocop.yml
+@@ -7,3 +7,5 @@ inherit_from: ../rubocop.yml
+ Documentation/CheckPathDocumented:
+   Include:
+     - "app/controllers/**/*"
++    - "app/routes/**/*"
++    - "app.rb"

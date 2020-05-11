@@ -5,6 +5,7 @@ module RuboCop
     module Documentation
       # This cop checks for missing swagger-yard documentation tag for
       # public methods. It should only be used on controllers.
+      # To ensure this, the default path is set to app/controllers.
       # See https://github.com/rubocop-hq/rubocop/blob/master/lib/rubocop/cop/style/documentation_method.rb
       #
       # @example
