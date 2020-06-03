@@ -1,0 +1,10 @@
+{
+  "fruits": [
+    "strawberry:         54",
+    "lemon:              <%= (ENV[\"LEMON\"] || 10).to_i %>"
+  ],
+  "meals": [
+    "POUTINE: available",
+    "CAKE: not_available"
+  ]
+}

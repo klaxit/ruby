@@ -15,6 +15,7 @@ class Danger::DangerKlaxit < Danger::Plugin
   def common
     fail_for_bad_commits
     warn_for_public_methods_without_specs
+    warn_for_bad_order_in_config
     warn_rubocop
     run_brakeman_scanner if rails_like_project?
   end
@@ -79,6 +80,25 @@ class Danger::DangerKlaxit < Danger::Plugin
         warn("Missing spec for `#{details}`", file: file, line: details.line)
       end
     end
+  end
+
+  # Verify order in config.yml
+  def warn_for_bad_order_in_config
+    return unless git.modified_files.include?("config/config.yml")
+    warn(
+      <<~MESSAGE
+        Your `config/config.yml` file is badly ordered,
+        here are the problematic keys:
+        <details>
+          <summary>config/config.yml</summary>
+          #{
+            badly_ordered_lines_as_string(
+              badly_ordered_lines(config_file)
+            )
+          }
+        </details>
+      MESSAGE
+    )
   end
 
   private
@@ -271,5 +291,56 @@ class Danger::DangerKlaxit < Danger::Plugin
                                   is_instance: false)
       end
     end
+  end
+
+  # Read the config.yml file (in a very custom way)
+  #
+  # @return [Hash]
+  def config_file
+    config = {}
+    name_regex = /^(?<name>\w+):/
+    var_regex = /^[ \t]+(?<line>\w+:.+)$/
+    block = nil
+    File.readlines("config/config.yml").each do |line|
+      if (name_matches = line.match(name_regex))
+        block = name_matches[:name]
+        config[block] = []
+      elsif (var_matches = line.match(var_regex))
+        config[block] << var_matches[:line]
+      end
+    end
+    config
+  end
+
+  # List all badly ordered lines from a config.yml
+  #
+  # @param config [Hash]
+  # @return [Hash]
+  def badly_ordered_lines(config)
+    result = {}
+    config.each do |(block, lines)|
+      sorted_lines = lines.sort
+      next if sorted_lines == lines
+      lines.each_with_index do |line, index|
+        if line != sorted_lines[index]
+          result[block] = [] if result[block].nil?
+          result[block] << line
+        end
+      end
+    end
+    result
+  end
+
+  # Format badly ordered lines as string
+  #
+  # @param [Hash] input
+  # @return [String]
+  def badly_ordered_lines_as_string(input)
+    input.map do |(block, lines)|
+      <<~TEXT
+        In the `#{block}` block:
+        #{lines.map { |line| "- `#{line}`" }.join("\n")}
+      TEXT
+    end.join("\n")
   end
 end

@@ -1,0 +1,7 @@
+In the `fruits` block:
+- `strawberry:         54`
+- `lemon:              <%= (ENV["LEMON"] || 10).to_i %>`
+
+In the `meals` block:
+- `POUTINE: available`
+- `CAKE: not_available`
