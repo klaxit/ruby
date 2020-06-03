@@ -15,6 +15,7 @@ class Danger::DangerKlaxit < Danger::Plugin
   def common
     fail_for_bad_commits
     warn_for_public_methods_without_specs
+    warn_for_bad_order_in_config
     warn_rubocop
     run_brakeman_scanner if rails_like_project?
   end
@@ -79,6 +80,16 @@ class Danger::DangerKlaxit < Danger::Plugin
         warn("Missing spec for `#{details}`", file: file, line: details.line)
       end
     end
+  end
+
+  # Verify order in config.yml
+  def warn_for_bad_order_in_config
+    return unless git.modified_files.include?("config/config.yml")
+    warn(
+      formatted_diff(
+        diff_for_sorted_config(config_file)
+      )
+    )
   end
 
   private
@@ -270,6 +281,63 @@ class Danger::DangerKlaxit < Danger::Plugin
                                   method_name: node.children[1],
                                   is_instance: false)
       end
+    end
+  end
+
+  # Read the config.yml file (in a very custom way)
+  #
+  # @return [Hash]
+  def config_file
+    config = {}
+    name_regex = /^(?<name>[a-z]+):/i
+    var_regex = /^  (?<line>[a-z_]+:.+)$/
+    block = nil
+    File.readlines("config/config.yml").each do |line|
+      if (name_matches = line.match(name_regex))
+        block = name_matches[:name]
+        config[block] = []
+        next
+      end
+      if (var_matches = line.match(var_regex))
+        config[block] << var_matches[:line]
+      end
+    end
+    config
+  end
+
+  # Create a diff based on the config and its sorted version
+  #
+  # @param config [Hash]
+  # @return [Hash]
+  def diff_for_sorted_config(config)
+    result = {}
+    config.each do |(block, lines)|
+      sorted_lines = lines.sort
+      next if sorted_lines == lines
+      lines.each_with_index do |line, index|
+        if line != sorted_lines[index]
+          result[block] = [] if result[block].nil?
+          result[block] << { remove: line, add: sorted_lines[index] }
+        end
+      end
+    end
+    result
+  end
+
+  # Format diff for displaying
+  #
+  # @param [Hash] diff
+  # @return [String]
+  def formatted_diff(structured_diff)
+    structured_diff.reduce("") do |diff, (block, diffs)|
+      diff += <<~DIFF
+        [#{block}]\n
+        #{
+          diffs.map do |diff|
+            "-#{diff[:remove]}\n+#{diff[:add]}\n"
+          end.join("\n")
+        }
+      DIFF
     end
   end
 end

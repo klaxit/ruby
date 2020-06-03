@@ -191,6 +191,73 @@ module Danger
         end
       end
 
+      describe "#warn_for_bad_order_in_config" do
+        before do
+          allow(@plugin.git).to receive(:modified_files) { modified_files }
+        end
+        context "when config/config.yml has not been modified" do
+          let(:modified_files) { [] }
+          it "should not call methods" do
+            expect(@plugin).to_not receive(:config_file)
+            expect(@plugin).to_not receive(:diff_for_sorted_config)
+            expect(@plugin).to_not receive(:formatted_diff)
+            expect(@plugin).to_not receive(:warn)
+            @plugin.warn_for_bad_order_in_config
+          end
+        end
+        context "when config/config.yml has been modified" do
+          let(:modified_files) { ["config/config.yml"] }
+          it "should call methods" do
+            expect(@plugin).to receive(:config_file) { {} }
+            expect(@plugin).to receive(:diff_for_sorted_config) { {} }
+            expect(@plugin).to receive(:formatted_diff) { "" }
+            expect(@plugin).to receive(:warn)
+            @plugin.warn_for_bad_order_in_config
+          end
+        end
+      end
+
+      describe "#config_file" do
+        it "should load the config file" do
+          yml_contents = File.readlines("#{__dir__}/support/fixtures/config/config.yml")
+          allow(File).to receive(:readlines) { yml_contents }
+          expect(@plugin.send(:config_file)).to eq(
+            JSON.parse(
+              File.read("#{__dir__}/support/fixtures/config/config.json")
+            )
+          )
+        end
+      end
+
+      describe "#diff_for_sorted_config" do
+        it "should create a valid diff" do
+          output = @plugin.send(
+            :diff_for_sorted_config,
+            JSON.parse(
+              File.read("#{__dir__}/support/fixtures/config/config.json")
+            )
+          ).each do |(block, diffs)|
+            diffs.map! { |diff| diff.transform_keys(&:to_s) }
+          end
+          expect(output).to eq(
+            JSON.parse(
+              File.read("#{__dir__}/support/fixtures/config/diff.json")
+            )
+          )
+        end
+      end
+
+      describe "#formatted_diff" do
+        it "should format the diff for displaying" do
+          structured_diff = JSON.parse(
+            File.read("#{__dir__}/support/fixtures/config/diff.json")
+          )
+          expect(@plugin.send(:formatted_diff, structured_diff)).to eq(
+            File.read("#{__dir__}/support/fixtures/config/diff.txt")
+          )
+        end
+      end
+
       describe "#run_brakeman_scanner" do
         around do |example|
           Dir.chdir("#{__dir__}/support/fixtures/klaxit-example-app", &example)
