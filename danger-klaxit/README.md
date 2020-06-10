@@ -26,7 +26,7 @@ Dont forget to also [add danger to your CI][doc-danger-ci]!
   there are two commits with the same name.
 - **klaxit.warn_for_public_methods_without_specs** — will write inline comment
   for a new public method that has no spec.
-- **klaxit.warn_for_bad_order_in_config** —will write a diff comment if repo's
+- **klaxit.warn_for_bad_order_in_config** — will write a diff comment if repo's
   modified `config/config.yml` is not ordered
 - **klaxit.run_brakeman_scanner** — will write a markdown report if there is a
   brakeman issue. This should only be used in rails or active_record projects.

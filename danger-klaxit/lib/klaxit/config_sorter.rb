@@ -14,6 +14,7 @@ module Klaxit
       @file = file
     end
 
+    # @return [String] the sorted file
     def sorted_file
       @sorted_file ||= parse
     end
@@ -24,6 +25,8 @@ module Klaxit
       @changed ||= sorted_file != IO.read(file)
     end
 
+    # Get a git diff between the current file and sorted file.
+    # @return [String]
     def diff
       require "tempfile"
       new_file = Tempfile.new(["new_config.", ".yml"])
@@ -46,8 +49,6 @@ module Klaxit
       result_file = String.new
       first_group = true
       current_child = 0.chr
-      # d = false
-      # binding.pry
       IO.foreach(file) do |line|
         next if blank?(line)
         group = line if line.match?(PARENT_RE)
@@ -57,6 +58,7 @@ module Klaxit
           next
         end
 
+        # Handle change of group.
         if !group.nil? && group != current_group
           if current_group
             result_file += "\n" unless first_group
@@ -75,10 +77,12 @@ module Klaxit
           next
         end
 
+        # Handle current line for current group.
         child = line[CHILD_RE, 1]
         current_child = child if child
         data_for_group[current_child] += line
       end
+      # If there is still an unhandled group, handle it!
       unless data_for_group.empty?
         result_file += "\n" unless first_group
         first_group = false
@@ -94,6 +98,8 @@ module Klaxit
       string.match?(/\A\s*\z/)
     end
 
+    # Since git diff is prepended by +a/+ or +b/+, we want to be sure paths
+    # doesn't contain a leading slash.
     def no_slash_beginning(string)
       string.reverse.chomp("/").reverse
     end
