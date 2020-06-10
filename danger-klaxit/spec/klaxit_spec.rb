@@ -192,72 +192,99 @@ module Danger
       end
 
       describe "#warn_for_bad_order_in_config" do
+        let(:content) { nil }
         before do
           allow(@plugin.git).to receive(:modified_files) { modified_files }
+          if content
+            Dir.mkdir("config")
+            IO.write("config/config.yml", content)
+          end
+        end
+        after do
+          FileUtils.rm_rf("config") if content
         end
         context "when config/config.yml has not been modified" do
           let(:modified_files) { [] }
-          it "should not call methods" do
-            expect(@plugin).to_not receive(:config_file)
-            expect(@plugin).to_not receive(:badly_ordered_lines)
-            expect(@plugin).to_not receive(:badly_ordered_lines_as_string)
-            expect(@plugin).to_not receive(:warn)
+          it "should not print anything" do
             @plugin.warn_for_bad_order_in_config
+            expect(@plugin.status_report.values).to all be_empty
           end
         end
-        context "when config/config.yml has been modified" do
+        context "when config/config.yml is in correct order" do
           let(:modified_files) { ["config/config.yml"] }
-          it "should call methods" do
-            expect(@plugin).to receive(:config_file) { {} }
-            expect(@plugin).to receive(:badly_ordered_lines) { {} }
-            expect(@plugin).to receive(:badly_ordered_lines_as_string) { "" }
-            expect(@plugin).to receive(:warn)
+          let(:content) do
+            <<~YAML
+              # This is a top-comment
+              foo: &foo
+                a: 1
+                b: 3
+                c: |
+                  coucou
+                  tu
+                  veux
+
+              bar:
+                <<: foo
+                lol: cat
+            YAML
+          end
+          it "should not print anything" do
             @plugin.warn_for_bad_order_in_config
+            expect(@plugin.status_report.values).to all be_empty
           end
         end
-      end
+        context "when file is badly ordered" do
+          let(:modified_files) { ["config/config.yml"] }
+          let(:content) do
+            <<~YAML
+              # This is a top-comment
+              foo: &foo
+                b: 3
+                a: 1
+                c: |
+                  coucou
+                  tu
+                  veux
+                d: la reponse d
 
-      describe "#config_file" do
-        it "should load the config file" do
-          yml_contents = File.readlines("#{__dir__}/support/fixtures/config/config.yml")
-          allow(File).to receive(:readlines) { yml_contents }
-          expect(@plugin.send(:config_file)).to eq(
-            JSON.parse(
-              File.read("#{__dir__}/support/fixtures/config/config.json")
-            )
-          )
-        end
-      end
+              bar:
+                <<: foo
+                lol: cat
+                c: |
+                  voir
+                  mes
+                  bits
+            YAML
+          end
+          it "should warn and help user to change the code" do
+            @plugin.warn_for_bad_order_in_config
+            expect(@plugin.status_report[:warnings].length).to be 1
+            expect(@plugin.status_report[:markdowns].length).to be 1
+            expect(@plugin.status_report[:markdowns].first.message.include?(
+              <<~MARKDOWN
+                ```yaml
+                # This is a top-comment
+                foo: &foo
+                  a: 1
+                  b: 3
+                  c: |
+                    coucou
+                    tu
+                    veux
+                  d: la reponse d
 
-      describe "#badly_ordered_lines" do
-        it "should list badly ordered lines" do
-          output = @plugin.send(
-            :badly_ordered_lines,
-            JSON.parse(
-              File.read("#{__dir__}/support/fixtures/config/config.json")
-            )
-          )
-          expect(output).to eq(
-            JSON.parse(
-              File.read("#{__dir__}/support/fixtures/config/badly_ordered_lines.json")
-            )
-          )
-        end
-      end
+                bar:
+                  <<: foo
+                  c: |
+                    voir
+                    mes
+                    bits
+                  lol: cat
 
-      describe "#badly_ordered_lines_as_string" do
-        it "should format the badly ordered lines for displaying" do
-          output = @plugin.send(
-            :badly_ordered_lines_as_string,
-            JSON.parse(
-              File.read(
-                "#{__dir__}/support/fixtures/config/badly_ordered_lines.json"
-              )
-            )
-          )
-          expect(output).to eq(
-            File.read("#{__dir__}/support/fixtures/config/badly_ordered_lines.txt")
-          )
+                ```
+              MARKDOWN
+            )).to be
+          end
         end
       end
 
