@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # This plugin is very specifically designed to help CI within Klaxit projects.
 # It is available here since it has to be accessible to private or public
 # projects. And moreover, anyone is free to use a part of it if it matches your
@@ -56,7 +58,7 @@ class Danger::DangerKlaxit < Danger::Plugin
   # the current path, and klaxit naming conventions (i.e `klaxit-<name>`).
   def run_brakeman_scanner
     configs = { app_path: "." }
-    configs.merge!(github_repo: "#{github_repo}") if github_repo
+    configs.merge!(github_repo: github_repo.to_s) if github_repo
     brakeman_scanner.run(configs)
   end
 
@@ -83,13 +85,39 @@ class Danger::DangerKlaxit < Danger::Plugin
   end
 
   # Verify order in config.yml
-  def warn_for_bad_order_in_config
-    return unless git.modified_files.include?("config/config.yml")
-    warn(
-      formatted_diff(
-        diff_for_sorted_config(config_file)
-      )
-    )
+  def warn_for_bad_order_in_config(config_file = "config/config.yml")
+    return unless git.modified_files.include?(config_file)
+
+    require_relative "klaxit/config_sorter"
+    sorter = Klaxit::ConfigSorter.new(config_file)
+    return unless sorter.changed?
+
+    warn("#{config_file} is not correctly sorted! I've printed it [below](#config_file) for you.")
+    markdown <<~MARKDOWN
+      <a id="config_file"></a>Here's the updated configuration file:
+
+      <details>
+
+      ```yaml
+      #{sorter.sorted_file}
+      ```
+
+      </details>
+
+      And here's a diff that you can apply with `git apply <file>` if you're
+      more of a git guy:
+
+      <details>
+
+      ```patch
+      #{sorter.diff}
+      ```
+
+      </details>
+
+      I know bots are not flawed, but since I've been designed by humans, you
+      should still review before applying :wink:.
+    MARKDOWN
   end
 
   private
@@ -111,7 +139,7 @@ class Danger::DangerKlaxit < Danger::Plugin
 
   def github_repo
     github.html_link("")[%r(github.com/((?:[^/]+)/(?:[^/]+))), 1]
-  rescue
+  rescue StandardError
     nil
   end
 
@@ -281,63 +309,6 @@ class Danger::DangerKlaxit < Danger::Plugin
                                   method_name: node.children[1],
                                   is_instance: false)
       end
-    end
-  end
-
-  # Read the config.yml file (in a very custom way)
-  #
-  # @return [Hash]
-  def config_file
-    config = {}
-    name_regex = /^(?<name>[a-z]+):/i
-    var_regex = /^  (?<line>[a-z_]+:.+)$/
-    block = nil
-    File.readlines("config/config.yml").each do |line|
-      if (name_matches = line.match(name_regex))
-        block = name_matches[:name]
-        config[block] = []
-        next
-      end
-      if (var_matches = line.match(var_regex))
-        config[block] << var_matches[:line]
-      end
-    end
-    config
-  end
-
-  # Create a diff based on the config and its sorted version
-  #
-  # @param config [Hash]
-  # @return [Hash]
-  def diff_for_sorted_config(config)
-    result = {}
-    config.each do |(block, lines)|
-      sorted_lines = lines.sort
-      next if sorted_lines == lines
-      lines.each_with_index do |line, index|
-        if line != sorted_lines[index]
-          result[block] = [] if result[block].nil?
-          result[block] << { remove: line, add: sorted_lines[index] }
-        end
-      end
-    end
-    result
-  end
-
-  # Format diff for displaying
-  #
-  # @param [Hash] diff
-  # @return [String]
-  def formatted_diff(structured_diff)
-    structured_diff.reduce("") do |diff, (block, diffs)|
-      diff += <<~DIFF
-        [#{block}]\n
-        #{
-          diffs.map do |diff|
-            "-#{diff[:remove]}\n+#{diff[:add]}\n"
-          end.join("\n")
-        }
-      DIFF
     end
   end
 end
