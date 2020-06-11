@@ -216,7 +216,9 @@ module Danger
             <<~YAML
               # This is a top-comment
               foo: &foo
+                # this is a
                 a: 1
+                # this is b
                 b: 3
                 c: |
                   coucou
@@ -239,6 +241,7 @@ module Danger
             <<~YAML
               # This is a top-comment
               foo: &foo
+                # this is b
                 b: 3
                 a: 1
                 c: |
@@ -266,6 +269,7 @@ module Danger
                 # This is a top-comment
                 foo: &foo
                   a: 1
+                  # this is b
                   b: 3
                   c: |
                     coucou
