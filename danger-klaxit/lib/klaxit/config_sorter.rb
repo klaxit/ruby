@@ -187,8 +187,6 @@ module Klaxit
           element.name = $1
           element.add_content(next_line)
         else
-          p check_line
-          p check_line
           raise Error, error_message
         end
       end
