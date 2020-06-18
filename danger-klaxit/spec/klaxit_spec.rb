@@ -191,6 +191,107 @@ module Danger
         end
       end
 
+      describe "#warn_for_bad_order_in_config" do
+        let(:content) { nil }
+        before do
+          allow(@plugin.git).to receive(:modified_files) { modified_files }
+          if content
+            Dir.mkdir("config")
+            IO.write("config/config.yml", content)
+          end
+        end
+        after do
+          FileUtils.rm_rf("config") if content
+        end
+        context "when config/config.yml has not been modified" do
+          let(:modified_files) { [] }
+          it "should not print anything" do
+            @plugin.warn_for_bad_order_in_config
+            expect(@plugin.status_report.values).to all be_empty
+          end
+        end
+        context "when config/config.yml is in correct order" do
+          let(:modified_files) { ["config/config.yml"] }
+          let(:content) do
+            <<~YAML
+              # This is a top-comment
+              foo: &foo
+                # this is a
+                a: 1
+                # this is b
+                b: 3
+                c: |
+                  coucou
+                  tu
+                  veux
+
+              bar:
+                <<: foo
+                lol: cat
+            YAML
+          end
+          it "should not print anything" do
+            @plugin.warn_for_bad_order_in_config
+            expect(@plugin.status_report.values).to all be_empty
+          end
+        end
+        context "when file is badly ordered" do
+          let(:modified_files) { ["config/config.yml"] }
+          let(:content) do
+            <<~YAML
+              # This is a top-comment
+              foo: &foo
+                # this is b
+                b: 3
+                a: 1
+                c: |
+                  coucou
+                  tu
+                  veux
+                d: la reponse d
+
+              bar:
+                <<: foo
+                lol: cat
+                c: |
+                  voir
+                  mes
+                  bits
+            YAML
+          end
+          it "should warn and help user to change the code" do
+            @plugin.warn_for_bad_order_in_config
+            expect(@plugin.status_report[:warnings].length).to be 1
+            expect(@plugin.status_report[:markdowns].length).to be 1
+            expect(@plugin.status_report[:markdowns].first.message.include?(
+              <<~MARKDOWN
+                ```yaml
+                # This is a top-comment
+                foo: &foo
+                  a: 1
+                  # this is b
+                  b: 3
+                  c: |
+                    coucou
+                    tu
+                    veux
+                  d: la reponse d
+
+                bar:
+                  <<: foo
+                  c: |
+                    voir
+                    mes
+                    bits
+                  lol: cat
+
+                ```
+              MARKDOWN
+            )).to be
+          end
+        end
+      end
+
       describe "#run_brakeman_scanner" do
         around do |example|
           Dir.chdir("#{__dir__}/support/fixtures/klaxit-example-app", &example)

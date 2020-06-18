@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # This plugin is very specifically designed to help CI within Klaxit projects.
 # It is available here since it has to be accessible to private or public
 # projects. And moreover, anyone is free to use a part of it if it matches your
@@ -15,6 +17,7 @@ class Danger::DangerKlaxit < Danger::Plugin
   def common
     fail_for_bad_commits
     warn_for_public_methods_without_specs
+    warn_for_bad_order_in_config
     warn_rubocop
     run_brakeman_scanner if rails_like_project?
   end
@@ -55,7 +58,7 @@ class Danger::DangerKlaxit < Danger::Plugin
   # the current path, and klaxit naming conventions (i.e `klaxit-<name>`).
   def run_brakeman_scanner
     configs = { app_path: "." }
-    configs.merge!(github_repo: "#{github_repo}") if github_repo
+    configs.merge!(github_repo: github_repo.to_s) if github_repo
     brakeman_scanner.run(configs)
   end
 
@@ -81,6 +84,42 @@ class Danger::DangerKlaxit < Danger::Plugin
     end
   end
 
+  # Verify order in config.yml
+  def warn_for_bad_order_in_config(config_file = "config/config.yml")
+    return unless git.modified_files.include?(config_file)
+
+    require_relative "klaxit/config_sorter"
+    sorter = Klaxit::ConfigSorter.new(config_file)
+    return unless sorter.changed?
+
+    warn("#{config_file} is not correctly sorted! I've printed it [below](#config_file) for you.")
+    markdown <<~MARKDOWN
+      <a id="config_file"></a>Here's the updated configuration file:
+
+      <details>
+
+      ```yaml
+      #{sorter.sorted_file}
+      ```
+
+      </details>
+
+      And here's a diff that you can apply with `git apply <file>` if you're
+      more of a git guy:
+
+      <details>
+
+      ```patch
+      #{sorter.diff}
+      ```
+
+      </details>
+
+      I know bots are not flawed, but since I've been designed by humans, you
+      should still review before applying :wink:.
+    MARKDOWN
+  end
+
   private
 
   def new_ruby_files_excluding_spec
@@ -100,7 +139,7 @@ class Danger::DangerKlaxit < Danger::Plugin
 
   def github_repo
     github.html_link("")[%r(github.com/((?:[^/]+)/(?:[^/]+))), 1]
-  rescue
+  rescue StandardError
     nil
   end
 
