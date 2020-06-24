@@ -22,7 +22,7 @@ GEM
     parallel (1.19.1)
     parser (2.7.0.5)
       ast (~> 2.4.0)
-    rack (2.2.2)
+    rack (2.2.3)
     rainbow (3.0.0)
     rexml (3.2.4)
     rubocop (0.80.1)
