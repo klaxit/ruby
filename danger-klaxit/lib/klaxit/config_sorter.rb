@@ -241,7 +241,7 @@ module Klaxit
       require "tempfile"
       new_file = Tempfile.new(["new_config.", ".yml"])
       new_file.write(sorted_file)
-      result = `git diff -- #{file} #{new_file.path}`.gsub(
+      result = `git diff --word-diff --no-index -- #{file} #{new_file.path}`.gsub(
         no_slash_beginning(new_file.path),
         no_slash_beginning(file)
       )
