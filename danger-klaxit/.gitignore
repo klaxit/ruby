@@ -1,3 +1,5 @@
 pkg
 .yardoc
 /tmp
+.ruby-version
+Gemfile.lock
