@@ -58,10 +58,6 @@ class Danger::DangerKlaxit < Danger::Plugin
   # the current path, and klaxit naming conventions (i.e `klaxit-<name>`).
   def run_brakeman_scanner(configs = { app_path: "." })
     configs[:github_repo] = github_repo.to_s if github_repo
-    # Brakeman is unable to detect active_record version from a Sinatra project.
-    # Hence this trick until a solution is found!
-    # https://github.com/presidentbeef/brakeman/issues/1494
-    configs[:rails5] ||= true if sinatra_project?
     brakeman_scanner.run(configs)
   end
 
@@ -138,10 +134,6 @@ class Danger::DangerKlaxit < Danger::Plugin
   # Sinatra or Rails project.
   def rails_like_project?
     Dir.exist?("app")
-  end
-
-  def sinatra_project?
-    File.read("Gemfile.lock").match?(/\s{4}sinatra\s/)
   end
 
   def github_repo

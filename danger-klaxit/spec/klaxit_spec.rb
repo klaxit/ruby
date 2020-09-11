@@ -299,9 +299,7 @@ module Danger
 
         before do
           allow(@plugin).to receive(:github_repo) { github_repo }
-          allow(@plugin).to receive(:File) { file }
           allow(@dangerfile).to receive(:brakeman_scanner) { brakeman_scanner }
-          allow(File).to receive(:read).with("Gemfile.lock") { gemfile_lock }
         end
 
         around do |example|
@@ -311,32 +309,9 @@ module Danger
         it "runs brakeman with correct arguments" do
           expect(brakeman_scanner).to receive(:run).with(
             app_path: ".",
-            github_repo: "klaxit/klaxit-example-app"
+            github_repo: github_repo
           )
           @plugin.run_brakeman_scanner
-        end
-
-        context "when in a Sinatra project" do
-          let(:gemfile_lock) do
-            <<~GEMFILE
-              GEM
-                remote: https://rubygems.org/
-                specs:
-                  activemodel (x.x.x)
-                    activesupport (= x.x.x)
-                  sinatra (x.x.x)
-                  activerecord (x.x.x)
-                    activemodel (= x.x.x)
-            GEMFILE
-          end
-          it "should force Rails version" do
-            expect(brakeman_scanner).to receive(:run).with(
-              app_path: ".",
-              github_repo: github_repo,
-              rails5: true
-            )
-            @plugin.run_brakeman_scanner
-          end
         end
       end
 
