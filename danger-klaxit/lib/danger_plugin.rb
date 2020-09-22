@@ -119,6 +119,15 @@ class Danger::DangerKlaxit < Danger::Plugin
     MARKDOWN
   end
 
+  def warn_for_not_impacted_migration
+    migration_files = (git.added_files - %w(Dangerfile)).grep(%r(db/migrate))
+    return nil if migration_files.empty?
+
+    if git.modified_files.grep(%r(db/structure.sql|db/schema.rb$)).empty?
+      fail("You should commit your databases changes via `structure.sql` or `schema.rb` when your do a migration.")
+    end
+  end
+
   private
 
   def new_ruby_files_excluding_spec
