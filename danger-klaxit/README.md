@@ -30,6 +30,9 @@ Dont forget to also [add danger to your CI][doc-danger-ci]!
   modified `config/config.yml` is not ordered
 - **klaxit.run_brakeman_scanner** — will write a markdown report if there is a
   brakeman issue. This should only be used in rails or active_record projects.
+- **klaxit.warn_for_not_updated_structure_sql** -- will write inline comments
+  if there is migrations but structure.sql is not updated or the migrations
+  timestamps are not added
 
 
 
