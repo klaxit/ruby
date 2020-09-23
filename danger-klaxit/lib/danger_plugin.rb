@@ -19,6 +19,7 @@ class Danger::DangerKlaxit < Danger::Plugin
     warn_for_public_methods_without_specs
     warn_for_bad_order_in_config
     warn_rubocop
+    warn_for_not_updated_structure_sql
     run_brakeman_scanner if rails_like_project?
   end
 
@@ -119,12 +120,25 @@ class Danger::DangerKlaxit < Danger::Plugin
     MARKDOWN
   end
 
-  def warn_for_not_impacted_migration
+  def warn_for_not_updated_structure_sql
     migration_files = (git.added_files - %w(Dangerfile)).grep(%r(db/migrate))
     return nil if migration_files.empty?
 
-    if git.modified_files.grep(%r(db/structure.sql|db/schema.rb$)).empty?
-      fail("You should commit your databases changes via `structure.sql` or `schema.rb` when your do a migration.")
+    if git.modified_files.grep(%r(db/structure.sql)).empty?
+      warn("You should commit your databases changes via `structure.sql` or `schema.rb` when your do a migration.")
+    end
+
+    added_migrations_timestamps = migration_files.map do |elt|
+      File.basename(elt).partition("_").first
+    end
+
+    structure_diff = git.diff_for_file("db/structure.sql").patch
+    missing_timestamps = added_migrations_timestamps.reject do |ts|
+      structure_diff.include?(ts)
+    end
+
+    unless missing_timestamps.empty?
+      warn("Some migrations timestamps are missing: #{missing_timestamps.join(", ")}")
     end
   end
 
