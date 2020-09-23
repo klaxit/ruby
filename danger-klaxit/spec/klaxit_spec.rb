@@ -292,6 +292,58 @@ module Danger
         end
       end
 
+      describe "#warn_for_not_updated_structure_sql" do
+        before do
+          allow(@plugin.git).to receive(:added_files) { added_files }
+          allow(@plugin.git).to receive(:modified_files) { modified_files }
+          allow(@plugin.git).to receive(:diff_for_file) do |file|
+            if file == "db/structure.sql"
+              double(:diff, patch: structure_sql_diff)
+            end
+          end
+        end
+        context "when structure.sql is not updated" do
+          let(:migration_number) { rand(1..1000) }
+          let(:added_files) { ["db/migrate/#{migration_number}_a_migration.rb"] }
+          let(:modified_files) { [] }
+          let(:structure_sql_diff) { "" }
+
+          it "should warn structure.sql is not updated" do
+            @plugin.warn_for_not_updated_structure_sql
+            expect(@dangerfile.status_report[:warnings])
+              .to include("You should commit your databases changes via" \
+                " `structure.sql` when you do a migration.")
+          end
+        end
+
+        context "when structure.sql is updated" do
+          let(:migration_number) { rand(1..1000) }
+          let(:added_files) { ["db/migrate/#{migration_number}_migration.rb"] }
+          let(:modified_files) { ["db/structure.sql"] }
+          let(:structure_sql_diff) { "#{rand(1000..2000)}" }
+
+          it "should warn structure.sql is not updated" do
+            @plugin.warn_for_not_updated_structure_sql
+            expect(@dangerfile.status_report[:warnings])
+              .to include(
+                "Some migrations timestamps are missing: #{migration_number}"
+              )
+          end
+        end
+
+        context "when structure.sql is updated and has migration timestamp" do
+          let(:migration_number) { rand(1..1000) }
+          let(:added_files) { ["db/migrate/#{migration_number}_migration.rb"] }
+          let(:modified_files) { ["db/structure.sql"] }
+          let(:structure_sql_diff) { "#{migration_number}" }
+
+          it "should not warn" do
+            @plugin.warn_for_not_updated_structure_sql
+            expect(@plugin.status_report.values).to all be_empty
+          end
+        end
+      end
+
       describe "#run_brakeman_scanner" do
         let(:brakeman_scanner) { double }
         let(:github_repo) { "klaxit/klaxit-example-app" }
