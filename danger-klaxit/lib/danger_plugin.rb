@@ -125,7 +125,8 @@ class Danger::DangerKlaxit < Danger::Plugin
     return nil if migration_files.empty?
 
     if git.modified_files.grep(%r(db/structure.sql)).empty?
-      warn("You should commit your databases changes via `structure.sql` or `schema.rb` when your do a migration.")
+      warn("You should commit your databases changes via `structure.sql` when you do a migration.")
+      return nil
     end
 
     added_migrations_timestamps = migration_files.map do |elt|
