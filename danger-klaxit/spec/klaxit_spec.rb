@@ -292,6 +292,86 @@ module Danger
         end
       end
 
+      describe "#fail_for_not_updated_structure_sql" do
+        let(:structure_sql_diff) { "" }
+        let(:schema_rb_diff) { "" }
+        before do
+          allow(@plugin.git).to receive(:added_files) { added_files }
+          allow(@plugin.git).to receive(:modified_files) { modified_files }
+          allow(@plugin.git).to receive(:diff_for_file) do |file|
+            if file == "db/structure.sql"
+              double(:diff, patch: structure_sql_diff)
+            elsif file == "db/schema.rb"
+              double(:diff, patch: schema_rb_diff)
+            end
+          end
+        end
+        context "when structure.sql and schema.rb are not updated" do
+          let(:migration_number) { rand(1..1000) }
+          let(:added_files) { ["db/migrate/#{migration_number}_a_migration.rb"] }
+          let(:modified_files) { [] }
+
+          it "should warn structure.sql or schema.rb is not updated" do
+            @plugin.fail_for_not_updated_structure_sql
+            expect(@dangerfile.status_report[:errors])
+              .to include("You should commit your databases changes via" \
+                " `structure.sql` or `schema.rb` when you do a migration.")
+          end
+        end
+
+        context "when structure.sql is updated" do
+          let(:migration_number) { rand(1..1000) }
+          let(:added_files) { ["db/migrate/#{migration_number}_migration.rb"] }
+          let(:modified_files) { ["db/structure.sql"] }
+          let(:structure_sql_diff) { "#{rand(1000..2000)}" }
+
+          it "should warn structure.sql is not up to date with migrations" do
+            @plugin.fail_for_not_updated_structure_sql
+            expect(@dangerfile.status_report[:errors])
+              .to include(
+                "Some migrations timestamps are missing: #{migration_number}"
+              )
+          end
+        end
+
+        context "when structure.sql is updated and has migration timestamp" do
+          let(:migration_number) { rand(1..1000) }
+          let(:added_files) { ["db/migrate/#{migration_number}_migration.rb"] }
+          let(:modified_files) { ["db/structure.sql"] }
+          let(:structure_sql_diff) { "#{migration_number}" }
+
+          it "should not warn" do
+            @plugin.fail_for_not_updated_structure_sql
+            expect(@plugin.status_report.values).to all be_empty
+          end
+        end
+        context "when schema.rb is updated" do
+          let(:migration_number) { "#{rand(1..1000)}_#{rand(1..1000)}" }
+          let(:added_files) { ["db/migrate/#{migration_number}_migration.rb"] }
+          let(:modified_files) { ["db/schema.rb"] }
+          let(:schema_rb_diff) { "+ version: #{rand(1..1000)})" }
+
+          it "should warn schema.rb is not up to date with migrations" do
+            @plugin.fail_for_not_updated_structure_sql
+            expect(@dangerfile.status_report[:errors])
+              .to include(
+                "Version of schema.rb is not equal to most recent added migration"
+              )
+          end
+        end
+        context "when schema.rb is updated and has migration timestamp" do
+          let(:migration_number) { "#{rand(1..1000)}_#{rand(1..1000)}" }
+          let(:added_files) { ["db/migrate/#{migration_number.tr("_", "")}_migration.rb"] }
+          let(:modified_files) { ["db/schema.rb"] }
+          let(:schema_rb_diff) { "+ version: #{migration_number})" }
+
+          it "should not fail" do
+            @plugin.fail_for_not_updated_structure_sql
+            expect(@plugin.status_report.values).to all be_empty
+          end
+        end
+      end
+
       describe "#run_brakeman_scanner" do
         let(:brakeman_scanner) { double }
         let(:github_repo) { "klaxit/klaxit-example-app" }
