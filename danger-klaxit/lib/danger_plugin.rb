@@ -66,7 +66,7 @@ class Danger::DangerKlaxit < Danger::Plugin
     return failure("`spec` directory is missing") unless Dir.exist?("spec")
 
     spec_regex = /describe "([#.][^"]+)"/
-    db_files_regex = %r(db\/migrate\/.*)
+    db_files_regex = %r(db\/.*)
 
     new_public_methods_by_ruby_file
       .reject { |file| file =~ db_files_regex }
