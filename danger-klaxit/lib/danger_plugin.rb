@@ -66,22 +66,25 @@ class Danger::DangerKlaxit < Danger::Plugin
     return failure("`spec` directory is missing") unless Dir.exist?("spec")
 
     spec_regex = /describe "([#.][^"]+)"/
+    db_files_regex = %r(db\/migrate\/.*)
 
-    new_public_methods_by_ruby_file.each do |file, method_details|
-      file = new_name_for_file(file)
-      spec_file = "spec/" + file.sub(".rb", "_spec.rb").sub("app/", "")
-      next warn("No spec found for file #{file}.") unless File.exist?(spec_file)
+    new_public_methods_by_ruby_file
+      .reject { |file| file =~ db_files_regex }
+      .each do |file, method_details|
+        file = new_name_for_file(file)
+        spec_file = "spec/" + file.sub(".rb", "_spec.rb").sub("app/", "")
+        next warn("No spec found for file #{file}.") unless File.exist?(spec_file)
 
-      specs = IO.foreach(spec_file)
-                .map { |line| line[spec_regex, 1] }
-                .to_set
-                .tap { |set| set.delete(nil) }
-      method_details.each do |details|
-        next if specs.include?(details.name_with_prefix)
+        specs = IO.foreach(spec_file)
+                  .map { |line| line[spec_regex, 1] }
+                  .to_set
+                  .tap { |set| set.delete(nil) }
+        method_details.each do |details|
+          next if specs.include?(details.name_with_prefix)
 
-        warn("Missing spec for `#{details}`", file: file, line: details.line)
+          warn("Missing spec for `#{details}`", file: file, line: details.line)
+        end
       end
-    end
   end
 
   # Verify order in config.yml
