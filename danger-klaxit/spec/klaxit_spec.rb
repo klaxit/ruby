@@ -395,7 +395,7 @@ module Danger
         end
       end
 
-      describe "#new_ruby_files_excluding_spec_and_rubocop" do
+      describe "#new_ruby_files_excluding_spec_rubocop_and_migrations" do
         before do
           allow(@plugin).to receive(:new_ruby_files_excluding_spec) do
             %W(db/migrate/mimimi.rb #{Dir.pwd}/script/rm_rf_slash.rb app/good.rb)
@@ -412,7 +412,7 @@ module Danger
         after do
           FileUtils.mv(".rubocop.yml.copy", ".rubocop.yml")
         end
-        subject { @plugin.send(:new_ruby_files_excluding_spec_and_rubocop) }
+        subject { @plugin.send(:new_ruby_files_excluding_spec_rubocop_and_migrations) }
         it { should contain_exactly "app/good.rb" }
       end
 

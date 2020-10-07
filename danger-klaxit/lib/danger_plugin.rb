@@ -66,10 +66,8 @@ class Danger::DangerKlaxit < Danger::Plugin
     return failure("`spec` directory is missing") unless Dir.exist?("spec")
 
     spec_regex = /describe "([#.][^"]+)"/
-    db_files_regex = %r(db\/.*)
 
     new_public_methods_by_ruby_file
-      .reject { |file| file =~ db_files_regex }
       .each do |file, method_details|
         file = new_name_for_file(file)
         spec_file = "spec/" + file.sub(".rb", "_spec.rb").sub("app/", "")
@@ -190,13 +188,14 @@ class Danger::DangerKlaxit < Danger::Plugin
     @new_name_for_file[file]
   end
 
-  def new_ruby_files_excluding_spec_and_rubocop
-    @new_ruby_files_excluding_spec_and_rubocop ||=
+  def new_ruby_files_excluding_spec_rubocop_and_migrations
+    @new_ruby_files_excluding_spec_rubocop_and_migrations ||=
       begin
         require "rubocop"
         rubocop_config = RuboCop::ConfigStore.new.for(".")
         new_ruby_files_excluding_spec
           .reject { |file| rubocop_config.file_to_exclude?(file) }
+          .reject { |file| file.start_with?("db/") }
       end
   end
 
@@ -205,13 +204,13 @@ class Danger::DangerKlaxit < Danger::Plugin
     return @new_public_methods_by_ruby_file if @new_public_methods_by_ruby_file
 
     # DEBUG: show new ruby files
-    # dbg_data = new_ruby_files_excluding_spec_and_rubocop * ?,
-    # puts "new_ruby_files_excluding_spec_and_rubocop: #{dbg_data}"
+    # dbg_data = new_ruby_files_excluding_spec_rubocop_and_migrations * ?,
+    # puts "new_ruby_files_excluding_spec_rubocop_and_migrations: #{dbg_data}"
 
     # https://regex101.com/r/xLymHd
     new_method_regex = /^\+\s+def \b(?:self\.)?([^(\s]+).*/
     new_methods_by_file =
-      new_ruby_files_excluding_spec_and_rubocop.each_with_object({}) do |f, h|
+      new_ruby_files_excluding_spec_rubocop_and_migrations.each_with_object({}) do |f, h|
         methods = git.diff_for_file(f)
                      .patch
                      .split("\n")
