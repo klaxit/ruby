@@ -67,21 +67,22 @@ class Danger::DangerKlaxit < Danger::Plugin
 
     spec_regex = /describe "([#.][^"]+)"/
 
-    new_public_methods_by_ruby_file.each do |file, method_details|
-      file = new_name_for_file(file)
-      spec_file = "spec/" + file.sub(".rb", "_spec.rb").sub("app/", "")
-      next warn("No spec found for file #{file}.") unless File.exist?(spec_file)
+    new_public_methods_by_ruby_file
+      .each do |file, method_details|
+        file = new_name_for_file(file)
+        spec_file = "spec/" + file.sub(".rb", "_spec.rb").sub("app/", "")
+        next warn("No spec found for file #{file}.") unless File.exist?(spec_file)
 
-      specs = IO.foreach(spec_file)
-                .map { |line| line[spec_regex, 1] }
-                .to_set
-                .tap { |set| set.delete(nil) }
-      method_details.each do |details|
-        next if specs.include?(details.name_with_prefix)
+        specs = IO.foreach(spec_file)
+                  .map { |line| line[spec_regex, 1] }
+                  .to_set
+                  .tap { |set| set.delete(nil) }
+        method_details.each do |details|
+          next if specs.include?(details.name_with_prefix)
 
-        warn("Missing spec for `#{details}`", file: file, line: details.line)
+          warn("Missing spec for `#{details}`", file: file, line: details.line)
+        end
       end
-    end
   end
 
   # Verify order in config.yml
@@ -187,13 +188,14 @@ class Danger::DangerKlaxit < Danger::Plugin
     @new_name_for_file[file]
   end
 
-  def new_ruby_files_excluding_spec_and_rubocop
-    @new_ruby_files_excluding_spec_and_rubocop ||=
+  def new_ruby_files_excluding_spec_rubocop_and_migrations
+    @new_ruby_files_excluding_spec_rubocop_and_migrations ||=
       begin
         require "rubocop"
         rubocop_config = RuboCop::ConfigStore.new.for(".")
         new_ruby_files_excluding_spec
           .reject { |file| rubocop_config.file_to_exclude?(file) }
+          .reject { |file| file.start_with?("db/") }
       end
   end
 
@@ -202,13 +204,13 @@ class Danger::DangerKlaxit < Danger::Plugin
     return @new_public_methods_by_ruby_file if @new_public_methods_by_ruby_file
 
     # DEBUG: show new ruby files
-    # dbg_data = new_ruby_files_excluding_spec_and_rubocop * ?,
-    # puts "new_ruby_files_excluding_spec_and_rubocop: #{dbg_data}"
+    # dbg_data = new_ruby_files_excluding_spec_rubocop_and_migrations * ?,
+    # puts "new_ruby_files_excluding_spec_rubocop_and_migrations: #{dbg_data}"
 
     # https://regex101.com/r/xLymHd
     new_method_regex = /^\+\s+def \b(?:self\.)?([^(\s]+).*/
     new_methods_by_file =
-      new_ruby_files_excluding_spec_and_rubocop.each_with_object({}) do |f, h|
+      new_ruby_files_excluding_spec_rubocop_and_migrations.each_with_object({}) do |f, h|
         methods = git.diff_for_file(f)
                      .patch
                      .split("\n")
