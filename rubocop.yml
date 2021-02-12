@@ -134,3 +134,6 @@ Metrics/ModuleLength:
 Metrics/MethodLength:
   CountComments: false  # count full line comments?
   Max: 20
+
+Layout/LineLength:
+  Max: 80
