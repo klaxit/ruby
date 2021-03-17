@@ -28,6 +28,10 @@ Layout/SpaceInsideHashLiteralBraces:
 
 # Please keep rules in alphabetical order...
 
+Style/AsciiComments:
+  # Because 👆 is not the finger you are looking for.
+  Enabled: false
+
 Style/ClassAndModuleChildren:
   # Checks the style of children definitions at classes and modules.
   #
