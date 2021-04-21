@@ -196,6 +196,7 @@ class Danger::DangerKlaxit < Danger::Plugin
         new_ruby_files_excluding_spec
           .reject { |file| rubocop_config.file_to_exclude?(file) }
           .reject { |file| file.start_with?("db/") }
+          .reject { |file| file.start_with?("app/workers/migrations/") }
       end
   end
 
