@@ -398,7 +398,10 @@ module Danger
       describe "#new_ruby_files_excluding_spec_rubocop_and_migrations" do
         before do
           allow(@plugin).to receive(:new_ruby_files_excluding_spec) do
-            %W(db/migrate/mimimi.rb #{Dir.pwd}/script/rm_rf_slash.rb app/good.rb)
+            %W(
+              db/migrate/mimimi.rb #{Dir.pwd}/script/rm_rf_slash.rb 
+              app/workers/migrations/migration.rb app/good.rb
+            )
           end
 
           FileUtils.mv(".rubocop.yml", ".rubocop.yml.copy")
