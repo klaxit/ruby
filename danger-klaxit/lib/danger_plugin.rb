@@ -40,27 +40,24 @@ class Danger::DangerKlaxit < Danger::Plugin
         line_number += 1 unless line.start_with?("- ")
 
         next unless line.start_with?("+ ")
+        next unless line.downcase.include?(" between ")
 
-        line.scan(/"{1}\X+"/).each do |match|
-          next unless match.downcase.include?(" between ")
+        warn("Don't use BETWEEN in PostgreSQL", file: file, line: line_number)
 
-          warn("Don't use BETWEEN in PostgreSQL", file: file, line: line_number)
+        markdown <<~MARKDOWN
+          # Don't use BETWEEN in PostgreSQL
 
-          markdown <<~MARKDOWN
-            # Don't use BETWEEN in PostgreSQL
+          It’s not a best pratice to use BETWEEN in PostgreSQL. Please use comparator instead:
 
-            It’s not a best pratice to use BETWEEN in PostgreSQL. Please use comparator instead:
+          ```SQL
+          SELECT * FROM blah WHERE timestampcol >= '2018-06-01' AND timestampcol < '2018-06-08'
+          ```
 
-            ```SQL
-            SELECT * FROM blah WHERE timestampcol >= '2018-06-01' AND timestampcol < '2018-06-08'
-            ```
+          If you need more info,
+          [read the doc](https://wiki.postgresql.org/wiki/Don%27t_Do_This#Don.27t_use_BETWEEN_.28especially_with_timestamps.29)!
 
-            If you need more info,
-            [read the doc](https://wiki.postgresql.org/wiki/Don%27t_Do_This#Don.27t_use_BETWEEN_.28especially_with_timestamps.29)!
-
-            _If it’s not a SQL query, please ignore this warning_
-          MARKDOWN
-        end
+          _If it’s not a SQL query, please ignore this warning_
+        MARKDOWN
       end
     end
   end
