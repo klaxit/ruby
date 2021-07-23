@@ -25,8 +25,11 @@ class Danger::DangerKlaxit < Danger::Plugin
   end
 
   # Warn for PostgreSQL BETWEEN usage
+  # Only for Ruby files and non commented lines
   def warn_for_pg_between
     git.modified_files.each do |file|
+      next unless file.end_with?(".rb")
+
       line_number = nil
       git.diff_for_file(file).patch.split("\n").each do |line|
         # Header of diff @@ +start,count -start,count @@
@@ -36,10 +39,11 @@ class Danger::DangerKlaxit < Danger::Plugin
 
         next unless line_number
 
-        # We are looking for + diff only
+        # Do not count deletion diff (we are only for addition only)
         line_number += 1 unless line.start_with?("- ")
 
         next unless line.start_with?("+ ")
+        next unless line.match?(/^\+\h*#.*$/)
         next unless line.downcase.include?(" between ")
 
         warn("Don't use BETWEEN in PostgreSQL", file: file, line: line_number)
