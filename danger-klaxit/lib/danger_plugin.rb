@@ -27,13 +27,24 @@ class Danger::DangerKlaxit < Danger::Plugin
   # Warn for PostgreSQL BETWEEN usage
   def warn_for_pg_between
     git.modified_files.each do |file|
+      line_number = nil
       git.diff_for_file(file).patch.split("\n").each do |line|
+        # Header of diff @@ +start,count -start,count @@
+        if line.match?(/^@@\s-\d+,{1}\d+\s\+\d+,\d+\s@@.+$/)
+          line_number = line[/\+[{1}\d+]*,/][/\d+/].to_i - 2
+        end
+
+        next unless line_number
+
+        # We are looking for + diff only
+        line_number += 1 unless line.start_with?("- ")
+
         next unless line.start_with?("+ ")
 
-        line.scan(/"{1}\X+\X+"/).each do |match|
+        line.scan(/"{1}\X+"/).each do |match|
           next unless match.downcase.include?(" between ")
 
-          warn("Don't use BETWEEN in PostgreSQL")
+          warn("Don't use BETWEEN in PostgreSQL", file: file, line: line_number)
 
           markdown <<~MARKDOWN
             # Don't use BETWEEN in PostgreSQL
