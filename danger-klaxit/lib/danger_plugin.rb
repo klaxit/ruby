@@ -33,17 +33,17 @@ class Danger::DangerKlaxit < Danger::Plugin
       line_number = nil
       git.diff_for_file(file).patch.split("\n").each do |line|
         # Header of diff @@ +start,count -start,count @@
-        if line.match?(/^@@\s-\d+,{1}\d+\s\+\d+,\d+\s@@.+$/)
+        if line.match?(/^@@\s-\d+,{1}\d+\s\+\d+,\d+\s@@.*$/)
           line_number = line[/\+[{1}\d+]*,/][/\d+/].to_i - 2
         end
 
         next unless line_number
 
         # Do not count deletion diff (we are only for addition only)
-        line_number += 1 unless line.start_with?("- ")
+        line_number += 1 unless line.start_with?("-")
 
-        next unless line.start_with?("+ ")
-        next unless line.match?(/^\+\h*#.*$/)
+        next unless line.start_with?("+")
+        next if line.match?(/^\+\s*#.*$/)
         next unless line.downcase.include?(" between ")
 
         warn("Don't use BETWEEN in PostgreSQL", file: file, line: line_number)
@@ -57,8 +57,7 @@ class Danger::DangerKlaxit < Danger::Plugin
           SELECT * FROM blah WHERE timestampcol >= '2018-06-01' AND timestampcol < '2018-06-08'
           ```
 
-          If you need more info,
-          [read the doc](https://wiki.postgresql.org/wiki/Don%27t_Do_This#Don.27t_use_BETWEEN_.28especially_with_timestamps.29)!
+          If you need more info, [read the doc](https://wiki.postgresql.org/wiki/Don%27t_Do_This#Don.27t_use_BETWEEN_.28especially_with_timestamps.29)!
 
           _If it’s not a SQL query, please ignore this warning_
         MARKDOWN
