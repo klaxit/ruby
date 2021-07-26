@@ -27,12 +27,12 @@ class Danger::DangerKlaxit < Danger::Plugin
   # Warn for PostgreSQL BETWEEN usage
   # Only for Ruby files and non commented lines
   def warn_for_pg_between
-    git.modified_files.each do |file|
+    (git.modified_files + git.added_files).each do |file|
       next unless file.end_with?(".rb")
 
       line_number = nil
       git.diff_for_file(file).patch.split("\n").each do |line|
-        # Header of diff @@ +start,count -start,count @@
+        # Header of diff @@ -start,count +start,count @@
         if line.match?(/^@@\s-\d+,{1}\d+\s\+\d+,\d+\s@@.*$/)
           line_number = line[/\+[{1}\d+]*,/][/\d+/].to_i - 2
         end

@@ -67,6 +67,7 @@ module Danger
         let(:content_diff) { nil }
         before do
           allow(@plugin.git).to receive(:modified_files) { modified_files }
+          allow(@plugin.git).to receive(:added_files) { [] }
           allow(@plugin.git).to receive(:diff_for_file).and_return(double(:diff, patch: content_diff))
         end
         context "when between is in a non ruby file" do
