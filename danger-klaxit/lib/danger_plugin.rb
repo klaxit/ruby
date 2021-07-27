@@ -16,53 +16,11 @@ class Danger::DangerKlaxit < Danger::Plugin
 
   def common
     fail_for_bad_commits
-    warn_for_pg_between
     warn_for_public_methods_without_specs
     warn_for_bad_order_in_config
     warn_rubocop
     fail_for_not_updated_structure_sql
     run_brakeman_scanner if rails_like_project?
-  end
-
-  # Warn for PostgreSQL BETWEEN usage
-  # Only for Ruby files and non commented lines
-  def warn_for_pg_between
-    (git.modified_files + git.added_files).each do |file|
-      next unless file.end_with?(".rb")
-
-      line_number = nil
-      git.diff_for_file(file).patch.split("\n").each do |line|
-        # Header of diff @@ -start,count +start,count @@
-        if line.match?(/^@@\s-\d+,{1}\d+\s\+\d+,\d+\s@@.*$/)
-          line_number = line[/\+[{1}\d+]*,/][/\d+/].to_i - 2
-        end
-
-        next unless line_number
-
-        # Do not count deletion diff (we are only for addition only)
-        line_number += 1 unless line.start_with?("-")
-
-        next unless line.start_with?("+")
-        next if line.match?(/^\+\s*#.*$/)
-        next unless line.downcase.include?(" between ")
-
-        warn("Don't use BETWEEN in PostgreSQL", file: file, line: line_number)
-
-        markdown <<~MARKDOWN
-          # Don't use BETWEEN in PostgreSQL
-
-          It’s not a best pratice to use BETWEEN in PostgreSQL. Please use comparator instead:
-
-          ```SQL
-          SELECT * FROM blah WHERE timestampcol >= '2018-06-01' AND timestampcol < '2018-06-08'
-          ```
-
-          If you need more info, [read the doc](https://wiki.postgresql.org/wiki/Don%27t_Do_This#Don.27t_use_BETWEEN_.28especially_with_timestamps.29)!
-
-          _If it’s not a SQL query, please ignore this warning_
-        MARKDOWN
-      end
-    end
   end
 
   def warn_rubocop
