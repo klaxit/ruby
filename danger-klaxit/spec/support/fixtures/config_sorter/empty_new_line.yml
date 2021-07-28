@@ -1,0 +1,9 @@
+DEFAULTS:
+  log_level: "please show errors"
+  a_private_key: |
+      foo
+
+      bar
+
+playground:
+  log_level: all
