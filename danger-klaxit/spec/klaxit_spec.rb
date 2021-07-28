@@ -62,63 +62,6 @@ module Danger
         end
       end
 
-      describe "#warn_for_pg_between" do
-        let(:modified_files) { [file_name] }
-        let(:content_diff) { nil }
-        before do
-          allow(@plugin.git).to receive(:modified_files) { modified_files }
-          allow(@plugin.git).to receive(:added_files) { [] }
-          allow(@plugin.git).to receive(:diff_for_file).and_return(double(:diff, patch: content_diff))
-        end
-        context "when between is in a non ruby file" do
-          let(:file_name) { "a_super_file.coucou" }
-          it "should not print anything" do
-            @plugin.warn_for_pg_between
-            expect(@plugin.status_report.values).to all be_empty
-          end
-        end
-        context "when between is in a ruby file" do
-          let(:file_name) { "a_super_file.rb" }
-          let(:content_diff) do
-            <<~DIFF
-            --- a/a_super_file.rb
-            +++ b/a_super_file.rb
-            @@ -1,4 +1,4 @@
-             A
-             content
-             with
-            -nothing
-            +a between inside
-            DIFF
-          end
-          it "should print warning" do
-            @plugin.warn_for_pg_between
-            expect(@plugin.status_report[:warnings].length).to be 1
-            expect(@plugin.status_report[:warnings][0]).to eq "Don't use BETWEEN in PostgreSQL"
-            expect(@plugin.status_report[:markdowns].length).to be 1
-          end
-        end
-        context "when between is in a ruby file" do
-          let(:file_name) { "a_super_file.rb" }
-          let(:content_diff) do
-            <<~DIFF
-            --- a/a_super_file.rb
-            +++ b/a_super_file.rb
-            @@ -1,4 +1,4 @@
-             A
-             content
-             with
-            -nothing
-            +#a between inside
-            DIFF
-          end
-          it "sshould not print anything" do
-            @plugin.warn_for_pg_between
-            expect(@plugin.status_report.values).to all be_empty
-          end
-        end
-      end
-
       # TODO: To test this correctly, you have to mock git data and find a way
       #       to either mock filesystem or point to a fixture directory while
       #       calling IO::foreach / File.exist? / Dir.exist?
@@ -456,7 +399,7 @@ module Danger
         before do
           allow(@plugin).to receive(:new_ruby_files_excluding_spec) do
             %W(
-              db/migrate/mimimi.rb #{Dir.pwd}/script/rm_rf_slash.rb
+              db/migrate/mimimi.rb #{Dir.pwd}/script/rm_rf_slash.rb 
               app/workers/migrations/migration.rb app/good.rb
             )
           end
