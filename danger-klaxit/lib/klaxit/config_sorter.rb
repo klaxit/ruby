@@ -64,16 +64,11 @@ module Klaxit
       def initialize
         @comments = []
         @content = []
-        @allow_empty = false
       end
 
       def to_s
         @comments.join("") +
           @content.join("")
-      end
-
-      def allow_empty!
-        @allow_empty = true
       end
 
       def trim_content!
@@ -84,7 +79,9 @@ module Klaxit
       end
 
       def allow_empty?
-        @allow_empty
+        return false if @content.empty?
+
+        /\|\s*\z/.match? @content.first
       end
 
       # @param line [String]
@@ -196,16 +193,13 @@ module Klaxit
       end
 
       def find_element_header(element)
-        case line = check_line
+        case check_line
         when /\A  #/ # comment
           element.add_comment(next_line)
           find_element_header(element)
         when /\A  (\w+)/ # definition
           element.name = $1
           element.add_content(next_line)
-          if line.match?(/\|\s*\z/)
-            element.allow_empty!
-          end
         else
           raise Error, error_message
         end
