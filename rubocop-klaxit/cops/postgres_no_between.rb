@@ -11,7 +11,7 @@ module RuboCop
 
         # Add offense when detect between in a string
         def on_str(node)
-          return unless node.value.downcase.match?(/\s{1}\bbetween\b\s{1}/i)
+          return unless node.value.match?(/\bbetween\b/i)
 
           add_offense(node)
         end
