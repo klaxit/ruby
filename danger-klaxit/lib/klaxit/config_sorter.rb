@@ -71,6 +71,19 @@ module Klaxit
           @content.join("")
       end
 
+      def trim_content!
+        return self unless allow_empty?
+
+        @content.pop while @content.last.match?(/\A\s*\z/)
+        self
+      end
+
+      def allow_empty?
+        return false if @content.empty?
+
+        /\|\s*\z/.match? @content.first
+      end
+
       # @param line [String]
       def add_comment(line)
         @comments << line
@@ -175,6 +188,7 @@ module Klaxit
         element = Element.new
         find_element_header(element)
         find_element_content(element)
+        element.trim_content!
         element
       end
 
@@ -192,8 +206,9 @@ module Klaxit
       end
 
       def find_element_content(element)
+        regex = element.allow_empty? ? /\A {3,}|\A\s*\z/ : /\A {3,}/
         case check_line
-        when /\A {3,}/ # content
+        when regex # content
           element.add_content(next_line)
           find_element_content(element)
         end

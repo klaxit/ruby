@@ -1,4 +1,6 @@
-require File.expand_path("spec_helper", __dir__)
+# frozen_string_literal: true
+
+require_relative "spec_helper"
 
 module Danger
   describe Danger::DangerKlaxit do
