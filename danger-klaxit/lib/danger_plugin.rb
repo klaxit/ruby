@@ -15,7 +15,6 @@ class Danger::DangerKlaxit < Danger::Plugin
   require "parser/current"
 
   def common
-    fail_for_bad_commits
     warn_for_public_methods_without_specs
     warn_for_bad_order_in_config
     warn_rubocop
@@ -32,6 +31,7 @@ class Danger::DangerKlaxit < Danger::Plugin
 
   # Inspects commit messages to stop someone from merging until the committer
   # squashes/edits his commits.
+  # Unused at Klaxit, we now use GitHub's squash & merge button.
   def fail_for_bad_commits
     messages = git.commits.map(&:message)
     git_keywords = %w(p pick r reword e edit s squash f fixup x exec
