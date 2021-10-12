@@ -19,7 +19,7 @@ module RuboCop
               "with transaction pooling. See: " \
               "https://devcenter.heroku.com/articles/best-practices-pgbouncer-configuration"
 
-        # Add offense if bad SET use detected
+        # Add offense if bad SET use detected in multiline or interpoled string
         def on_dstr(node)
           result = ""
 
@@ -31,12 +31,22 @@ module RuboCop
             result = result.dup.concat(item.value.gsub("\n", ""))
           end
 
-          unless result.match?(
-            /^SET(?! LOCAL)( SESSION)* [a-zA-Z_]+ *(TO|=)+ *.+/i
-          )
-            return
-          end
+          return unless result.match?(regex)
+
           add_offense(node)
+        end
+
+        # Add offense if bad SET use detected in oneline not interpoled string
+        def on_str(node)
+          return unless node.value.match?(regex)
+
+          add_offense(node)
+        end
+
+        private
+
+        def regex
+          /^SET(?! LOCAL)( SESSION)* [a-zA-Z_]+ *(TO|=)+ *.+/i
         end
       end
     end
