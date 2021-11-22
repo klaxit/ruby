@@ -3,6 +3,8 @@
 module RuboCop
   module Cop
     module ActiveRecord
+      # Raising ActiveRecord::Rollback in transaction blocks do not propagate
+      # especially within nested transactions (cf. https://bit.ly/3qWbvg9)
       class NoActiveRecordRollbackRaise < Cop
         MSG = "Avoid raising `ActiveRecord::Rollback`"
         RESTRICT_ON_SEND = %i(raise fail).freeze
