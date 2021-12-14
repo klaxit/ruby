@@ -53,6 +53,20 @@ RSpec.describe RuboCop::Cop::NoUndefinedVariableUsage, :config do
       end
     RUBY
   end
+  it "registers an offense for problematic assignments in parent contexts" do
+    expect_offense(<<~RUBY)
+      foo = foo
+      ^^^^^^^^^ Variable used before being defined
+      begin
+        foo = foo
+        ^^^^^^^^^ Variable used before being defined
+        begin
+          foo = foo
+          ^^^^^^^^^ Variable used before being defined
+        end
+      end
+    RUBY
+  end
   it "accepts when colliding function names are referenced explicitly" do
     expect_no_offenses(<<~RUBY)
       def foo
@@ -80,6 +94,17 @@ RSpec.describe RuboCop::Cop::NoUndefinedVariableUsage, :config do
     expect_no_offenses(<<~RUBY)
       a = 1
       a = a
+    RUBY
+  end
+  it "accepts when there is one parent context with variable definition" do
+    expect_no_offenses(<<~RUBY)
+      foo = 1
+      begin
+        foo = foo
+        begin
+          foo = foo
+        end
+      end
     RUBY
   end
 end
