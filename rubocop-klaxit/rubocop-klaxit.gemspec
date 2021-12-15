@@ -1,5 +1,8 @@
+# frozen_string_literal: true
+
 lib = File.expand_path("lib", __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+
 require "klaxit/rubocop/gem_version"
 
 Gem::Specification.new do |spec|
@@ -17,4 +20,6 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["rubocop/*"]
 
   spec.add_runtime_dependency "rubocop", [">= 0.44", "< 1"]
+
+  spec.add_development_dependency "rspec"
 end
