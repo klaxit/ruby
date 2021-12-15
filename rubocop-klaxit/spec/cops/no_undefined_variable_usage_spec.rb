@@ -44,6 +44,12 @@ RSpec.describe RuboCop::Cop::NoUndefinedVariableUsage, :config do
            ^^^ Variable used before being defined
     RUBY
   end
+  it "registers an offense when one problematic in multiple assignments" do
+    expect_offense(<<~RUBY)
+      foo, bar = foo, 1
+      ^^^ Variable used before being defined
+    RUBY
+  end
   it "registers an offense for assignments using definitions outside scope" do
     expect_offense(<<~RUBY)
       foo = 1
@@ -53,16 +59,14 @@ RSpec.describe RuboCop::Cop::NoUndefinedVariableUsage, :config do
       end
     RUBY
   end
-  it "registers an offense for problematic assignments in parent contexts" do
+  it "registers an offense for assignments in the outermost context only" do
     expect_offense(<<~RUBY)
       foo = foo
       ^^^^^^^^^ Variable used before being defined
       begin
         foo = foo
-        ^^^^^^^^^ Variable used before being defined
         begin
           foo = foo
-          ^^^^^^^^^ Variable used before being defined
         end
       end
     RUBY

@@ -89,15 +89,14 @@ module RuboCop
       end
 
       def single_asgns(node, sym)
-        node.each_child_node(:lvasgn).reject do |asgn_node|
-          asgn_node.children[0] == sym && lvar_with_sym(asgn_node, sym).any?
+        node.each_child_node(:lvasgn).select do |asgn_node|
+          asgn_node.children[0] == sym
         end
       end
 
       def multi_asgns(node, sym)
-        node.each_child_node(:masgn).reject do |asgn_node|
-          masgn_with_sym(asgn_node)&.include?(sym) &&
-            lvar_with_sym(asgn_node.children[1], sym).any?
+        node.each_child_node(:masgn).select do |asgn_node|
+          masgn_with_sym(asgn_node)&.include?(sym)
         end
       end
     end
