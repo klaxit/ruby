@@ -50,6 +50,14 @@ Style/ClassAndModuleChildren:
   # There are good reasons to use both, do not enforce this style.
   Enabled: false
 
+Style/CommentedKeyword:
+  # Checks if a comment is added after a keyword:
+  #
+  #   class Foo < ActiveRecord::Base # Not AppRecord, this is specific
+  #
+  # We don't have any specific reason to disallow it.
+  Enabled: false
+
 Style/Documentation:
   Enabled: false
 
