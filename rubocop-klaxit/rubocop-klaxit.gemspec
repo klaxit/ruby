@@ -19,7 +19,7 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["rubocop/*"]
 
-  spec.add_runtime_dependency "rubocop", [">= 0.44", "< 1"]
+  spec.add_runtime_dependency "rubocop", "~> 1.25"
 
   spec.add_development_dependency "rspec"
 end
