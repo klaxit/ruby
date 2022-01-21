@@ -1,6 +1,10 @@
 # Override default Rubocop confg
 # See https://github.com/bbatsov/rubocop
 
+AllCops:
+  NewCops: enable
+  SuggestExtensions: false
+
 Layout/DotPosition:
   EnforcedStyle: leading
 
