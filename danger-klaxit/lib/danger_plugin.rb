@@ -135,7 +135,7 @@ class Danger::DangerKlaxit < Danger::Plugin
     end
 
     added_migrations_timestamps = migration_files.map do |file|
-      File.basename(file).partition("_").first
+      File.basename(file).rpartition("_").first.tr("_", "")
     end
 
     if schema_file_exists
@@ -163,8 +163,7 @@ class Danger::DangerKlaxit < Danger::Plugin
       f.find { _1[/^.*version: (.*?)\)/] }
     end
     version = version_line[/^.*version: (.*?)\)/, 1] if version_line
-    failure("Could not find version in schema file") unless version
-
+    return failure("Could not find version in schema file") unless version
     unless version.tr("_", "") >= max_added_migrations_timestamp
       failure("Version of schema.rb should be equal or higher than last " \
               "added migration timestamp")
