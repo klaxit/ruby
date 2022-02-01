@@ -296,21 +296,22 @@ module Danger
 
       describe "#fail_for_not_updated_structure_sql" do
         let(:structure_sql_diff) { "" }
-        let(:schema_rb_diff) { "" }
+        let(:schema_rb) { "" }
+        let(:migration_timestamp) { Time.new }
+        let(:migration_str) do
+          migration_timestamp.strftime("%Y_%m_%d_%H%M%S")
+        end
         before do
           allow(@plugin.git).to receive(:added_files) { added_files }
           allow(@plugin.git).to receive(:modified_files) { modified_files }
           allow(@plugin.git).to receive(:diff_for_file) do |file|
             if file == "db/structure.sql"
               double(:diff, patch: structure_sql_diff)
-            elsif file == "db/schema.rb"
-              double(:diff, patch: schema_rb_diff)
             end
           end
         end
         context "when structure.sql and schema.rb are not updated" do
-          let(:migration_number) { rand(1..1000) }
-          let(:added_files) { ["db/migrate/#{migration_number}_a_migration.rb"] }
+          let(:added_files) { ["db/migrate/#{migration_str}_a_migration.rb"] }
           let(:modified_files) { [] }
 
           it "should warn structure.sql or schema.rb is not updated" do
@@ -322,54 +323,79 @@ module Danger
         end
 
         context "when structure.sql is updated" do
-          let(:migration_number) { rand(1..1000) }
-          let(:added_files) { ["db/migrate/#{migration_number}_migration.rb"] }
+          let(:added_files) { ["db/migrate/#{migration_str}_migration.rb"] }
           let(:modified_files) { ["db/structure.sql"] }
-          let(:structure_sql_diff) { "#{rand(1000..2000)}" }
+          let(:structure_sql_diff) do
+            "(#{(migration_timestamp - rand(1..10_000)).strftime("%Y%m%d%H%M%S")}),"
+          end
 
           it "should warn structure.sql is not up to date with migrations" do
             @plugin.fail_for_not_updated_structure_sql
             expect(@dangerfile.status_report[:errors])
               .to include(
-                "Some migrations timestamps are missing: #{migration_number}"
+                "Some migrations timestamps are missing: " \
+                "#{migration_timestamp.strftime("%Y%m%d%H%M%S")}"
               )
           end
         end
 
         context "when structure.sql is updated and has migration timestamp" do
-          let(:migration_number) { rand(1..1000) }
-          let(:added_files) { ["db/migrate/#{migration_number}_migration.rb"] }
+          let(:added_files) { ["db/migrate/#{migration_str}_migration.rb"] }
           let(:modified_files) { ["db/structure.sql"] }
-          let(:structure_sql_diff) { "#{migration_number}" }
+          let(:structure_sql_diff) { "(#{migration_timestamp.strftime("%Y%m%d%H%M%S")})" }
 
           it "should not warn" do
             @plugin.fail_for_not_updated_structure_sql
             expect(@plugin.status_report.values).to all be_empty
           end
         end
-        context "when schema.rb is updated" do
-          let(:migration_number) { "#{rand(1..1000)}_#{rand(1..1000)}" }
-          let(:added_files) { ["db/migrate/#{migration_number}_migration.rb"] }
+        context "when schema.rb exist" do
+          let(:added_files) { ["db/migrate/#{migration_str}_migration.rb"] }
           let(:modified_files) { ["db/schema.rb"] }
-          let(:schema_rb_diff) { "+ version: #{rand(1..1000)})" }
+          let(:schema_rb) do
+            "+ version: " \
+            "#{(migration_timestamp - rand(1..10_000)).strftime("%Y_%m_%d_%H%M%S")})"
+          end
+
+          before do
+            allow(File)
+              .to receive(:exist?)
+              .with("./db/schema.rb")
+              .and_return(true)
+            allow(File)
+            .to receive(:open)
+            .with("./db/schema.rb")
+            .and_return(schema_rb)
+          end
 
           it "should warn schema.rb is not up to date with migrations" do
             @plugin.fail_for_not_updated_structure_sql
             expect(@dangerfile.status_report[:errors])
               .to include(
-                "Version of schema.rb is not equal to most recent added migration"
+                "Version of schema.rb should be equal or higher than last " \
+                "added migration timestamp"
               )
           end
-        end
-        context "when schema.rb is updated and has migration timestamp" do
-          let(:migration_number) { "#{rand(1..1000)}_#{rand(1..1000)}" }
-          let(:added_files) { ["db/migrate/#{migration_number.tr("_", "")}_migration.rb"] }
-          let(:modified_files) { ["db/schema.rb"] }
-          let(:schema_rb_diff) { "+ version: #{migration_number})" }
+          context "when schema version is newer" do
+            let(:schema_rb) do
+              "+ version: " \
+              "#{(migration_timestamp + rand(1..10_000)).strftime("%Y_%m_%d_%H%M%S")})"
+            end
 
-          it "should not fail" do
-            @plugin.fail_for_not_updated_structure_sql
-            expect(@plugin.status_report.values).to all be_empty
+            it "should not warn" do
+              @plugin.fail_for_not_updated_structure_sql
+              expect(@plugin.status_report.values).to all be_empty
+            end
+          end
+          context "when schema version is equal to last added migrations" do
+            let(:added_files) { ["db/migrate/#{migration_str.tr("_", "")}_migration.rb"] }
+            let(:modified_files) { ["db/schema.rb"] }
+            let(:schema_rb) { "+ version: #{migration_str})" }
+
+            it "should not warn" do
+              @plugin.fail_for_not_updated_structure_sql
+              expect(@plugin.status_report.values).to all be_empty
+            end
           end
         end
       end
@@ -401,7 +427,7 @@ module Danger
         before do
           allow(@plugin).to receive(:new_ruby_files_excluding_spec) do
             %W(
-              db/migrate/mimimi.rb #{Dir.pwd}/script/rm_rf_slash.rb 
+              db/migrate/mimimi.rb #{Dir.pwd}/script/rm_rf_slash.rb
               app/workers/migrations/migration.rb app/good.rb
             )
           end
