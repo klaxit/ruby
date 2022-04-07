@@ -349,6 +349,23 @@ module Danger
             expect(@plugin.status_report.values).to all be_empty
           end
         end
+        context "when structure.sql is updated and has migration timestamp and subfolder" do
+          let(:added_files) do
+            [
+              "db/migrate/#{migration_str}_migration.rb",
+              "db/migrate/#{migration_str}_migration/file_fixture.csv"
+            ]
+          end
+          let(:modified_files) { ["db/structure.sql"] }
+          let(:structure_sql_diff) do
+            "(#{migration_timestamp.strftime("%Y%m%d%H%M%S")})"
+          end
+
+          it "should not warn" do
+            @plugin.fail_for_not_updated_structure_sql
+            expect(@plugin.status_report.values).to all be_empty
+          end
+        end
         context "when schema.rb exist" do
           let(:added_files) { ["db/migrate/#{migration_str}_migration.rb"] }
           let(:modified_files) { ["db/schema.rb"] }

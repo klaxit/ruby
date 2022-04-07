@@ -123,7 +123,7 @@ class Danger::DangerKlaxit < Danger::Plugin
 
   # Check all migrations were saved in schema/structure file
   def fail_for_not_updated_structure_sql
-    migration_files = git.added_files.grep(%r(db/migrate))
+    migration_files = git.added_files.grep(%r(db/migrate/.*rb))
     return nil if migration_files.empty?
 
     modified_files = git.modified_files
