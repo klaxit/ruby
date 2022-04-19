@@ -135,7 +135,7 @@ class Danger::DangerKlaxit < Danger::Plugin
     end
 
     added_migrations_timestamps = migration_files.map do |file|
-      File.basename(file).rpartition("_").first.tr("_", "")
+      File.basename(file).partition("_").first.tr("_", "")
     end
 
     if schema_file_exists
