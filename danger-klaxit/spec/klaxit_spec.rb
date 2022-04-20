@@ -299,7 +299,7 @@ module Danger
         let(:schema_rb) { "" }
         let(:migration_timestamp) { Time.new }
         let(:migration_str) do
-          migration_timestamp.strftime("%Y_%m_%d_%H%M%S")
+          migration_timestamp.strftime("%Y%m%d%H%M%S")
         end
         before do
           allow(@plugin.git).to receive(:added_files) { added_files }
@@ -323,7 +323,7 @@ module Danger
         end
 
         context "when structure.sql is updated" do
-          let(:added_files) { ["db/migrate/#{migration_str}_migration.rb"] }
+          let(:added_files) { ["db/migrate/#{migration_str}_database_migration.rb"] }
           let(:modified_files) { ["db/structure.sql"] }
           let(:structure_sql_diff) do
             "(#{(migration_timestamp - rand(1..10_000)).strftime("%Y%m%d%H%M%S")}),"
@@ -367,7 +367,7 @@ module Danger
           end
         end
         context "when schema.rb exist" do
-          let(:added_files) { ["db/migrate/#{migration_str}_migration.rb"] }
+          let(:added_files) { ["db/migrate/#{migration_str}_database_migration.rb"] }
           let(:modified_files) { ["db/schema.rb"] }
           let(:schema_rb) do
             "+ version: " \
