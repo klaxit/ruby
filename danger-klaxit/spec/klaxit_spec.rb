@@ -432,10 +432,10 @@ module Danger
         end
 
         it "runs brakeman with correct arguments" do
-          expect(brakeman_scanner).to receive(:run).with(
+          expect(brakeman_scanner).to receive(:run).with({
             app_path: ".",
             github_repo: github_repo
-          )
+          })
           @plugin.run_brakeman_scanner
         end
       end
