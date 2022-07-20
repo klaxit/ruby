@@ -126,10 +126,9 @@ class Danger::DangerKlaxit < Danger::Plugin
     migration_files = git.added_files.grep(%r(db/migrate/.*rb))
     return nil if migration_files.empty?
 
-    modified_files = git.modified_files
-    structure_file = modified_files.grep(%r(db/structure.sql)).first
+    structure_file_exists = File.exist?("./db/structure.sql")
     schema_file_exists = File.exist?("./db/schema.rb")
-    unless structure_file || schema_file_exists
+    unless structure_file_exists || schema_file_exists
       return failure("You should commit your databases changes via" \
                      " `structure.sql` or `schema.rb` when you do a migration.")
     end
