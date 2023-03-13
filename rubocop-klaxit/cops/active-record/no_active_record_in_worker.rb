@@ -11,7 +11,7 @@ module RuboCop
       # the active record object can have changed when the worker is run
       #
       # # Bad
-      # class Mate < AppRecord end
+      # class Mate < AppRecord; end
       #
       # class ZendeskCreateTicketBad < Service
       #   attribute :mate,              Types.Instance(Mate)
@@ -19,7 +19,8 @@ module RuboCop
       #
       # ZendeskCreateTicketBad.call_async(mate: …)
       #
-      # # Good
+      # #
+      # +
       # class ZendeskCreateTicketGood < Service
       #   attribute :mate_id,  Types::Strict::Integer
       # end
@@ -41,11 +42,12 @@ module RuboCop
           # node.arguments.each do |arg|
           #   arg
           # end
-          add_offense(node)
+          # add_offense(node)
         end
 
         def in_worker?(node)
-          return true
+          # useless, we want to catch all call_async calls
+          # return true
           # dirname = File.dirname(node.location.expression.source_buffer.name)
           # dirname.include?("app/workers")
         end
