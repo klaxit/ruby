@@ -1,26 +1,31 @@
 # frozen_string_literal: true
 
 RSpec.describe RuboCop::Cop::ActiveRecord::NoActiveRecordInWorker, :config do
-  # context "when we call call_async" do
-  #   it "registers an offense when the service has an attribute that is an instance of an ActiveRecord object" do
-  #     expect_no_offenses(<<~RUBY)
-  #       class Mate < AppRecord; end
-  #
-  #       class ZendeskCreateTicketBad < Service
-  #         attribute :mate,              Types.Instance(Mate)
-  #       end
-  #
-  #       ZendeskCreateTicketBad.call_async(mate: Mate.new)
-  #     RUBY
-  #   end
-  #
-  #   it "does not register an offense when the service uses identifiers" do
-  #     expect_no_offenses(<<~RUBY)
-  #       class ZendeskCreateTicketGood < Service
-  #         attribute :mate_id,  Types::Strict::Integer
-  #       end
-  #       ZendeskCreateTicketGood.call_async(mate_id: 123)
-  #     RUBY
-  #   end
-  # end
+  describe "when we call call_async on a service" do
+    context "when the service has an instance of an ActiveRecord object" do
+      before do
+        allow(cop).to receive(:is_service_blacklisted?)
+                        .with("ZendeskCreateTicketBad")
+                        .and_return(true)
+      end
+      it "registers an offense" do
+        expect_offense(<<~RUBY)
+          ZendeskCreateTicketBad.call_async(mate)
+        RUBY
+      end
+    end
+
+    context "when the service uses identifiers" do
+      before do
+          allow(cop).to receive(:is_service_blacklisted?)
+                          .with("ZendeskCreateTicketBad")
+                          .and_return(true)
+      end
+      it "does not register an offense" do
+        expect_no_offenses(<<~RUBY)
+          ZendeskCreateTicketGood.call_async(123)
+        RUBY
+      end
+    end
+  end
 end
