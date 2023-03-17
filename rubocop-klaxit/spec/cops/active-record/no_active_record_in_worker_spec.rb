@@ -5,8 +5,8 @@ RSpec.describe RuboCop::Cop::ActiveRecord::NoActiveRecordInWorker, :config do
     context "when the service has an instance of an ActiveRecord object" do
       before do
         allow(cop).to receive(:is_service_blacklisted?)
-                        .with("ZendeskCreateTicketBad")
-                        .and_return(true)
+          .with("ZendeskCreateTicketBad")
+          .and_return(true)
       end
       it "registers an offense" do
         expect_offense(<<~RUBY)
@@ -17,9 +17,9 @@ RSpec.describe RuboCop::Cop::ActiveRecord::NoActiveRecordInWorker, :config do
 
     context "when the service uses identifiers" do
       before do
-          allow(cop).to receive(:is_service_blacklisted?)
-                          .with("ZendeskCreateTicketBad")
-                          .and_return(true)
+        allow(cop).to receive(:is_service_blacklisted?)
+          .with("ZendeskCreateTicketBad")
+          .and_return(true)
       end
       it "does not register an offense" do
         expect_no_offenses(<<~RUBY)

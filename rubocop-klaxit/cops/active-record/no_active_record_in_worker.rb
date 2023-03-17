@@ -25,9 +25,9 @@ module RuboCop
       # end
       # ZendeskCreateTicketGood.call_async(mate_id: 123)
       class NoActiveRecordInWorker < Cop
-        MSG = "Avoid ActiveRecord objects in `call_async` calls."\
-            "Prefer object ids in order to avoid concurrency"\
-            "issues or side effects"
+        MSG = "Avoid ActiveRecord objects in `call_async` calls." \
+              "Prefer object ids in order to avoid concurrency" \
+              "issues or side effects"
 
         RESTRICT_ON_SEND = %i(call_async).freeze
 
@@ -41,7 +41,7 @@ module RuboCop
 
         def_node_matcher :is_sent_call_async?, <<~PATTERN
           (send ... {:perform_async :call_async} ...)
-          PATTERN
+        PATTERN
 
         private
 
@@ -62,7 +62,7 @@ module RuboCop
           return false unless File.exist?(source_file)
 
           source = File.read(source_file)
-          attribute_instances= source.scan(/attribute.*Types.Instance\((.*)\)/).flatten
+          attribute_instances = source.scan(/attribute.*Types.Instance\((.*)\)/).flatten
           (attribute_instances & model_blacklist).size > 0
         end
 
@@ -75,9 +75,9 @@ module RuboCop
         # so that we can reach the require source file from a service name
         def service_to_file(name)
           word = name.dup
-          word.gsub!(/::/, '/')
-          word.gsub!(/([A-Z]+)([A-Z][a-z])/,'\1_\2')
-          word.gsub!(/([a-z\d])([A-Z])/,'\1_\2')
+          word.gsub!(/::/, "/")
+          word.gsub!(/([A-Z]+)([A-Z][a-z])/, '\1_\2')
+          word.gsub!(/([a-z\d])([A-Z])/, '\1_\2')
           word.tr!("-", "_")
           word.downcase!
         end
@@ -91,8 +91,8 @@ module RuboCop
              .select { |f| File.file?(f) }
              .map do |model_path|
             File.basename(model_path)
-                .sub(/\.rb$/, '')
-                .split('_')
+                .sub(/\.rb$/, "")
+                .split("_")
                 .map(&:capitalize)
                 .join
           end
