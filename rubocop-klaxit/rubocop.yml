@@ -9,3 +9,7 @@ inherit_from: ../rubocop.yml
 Documentation/CheckPathDocumented:
   Include:
     - "app/controllers/**/*"
+
+#ActiveRecord/NoActiveRecordInWorker:
+#  Include:
+#    - "app/workers/**/*"

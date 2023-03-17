@@ -2,6 +2,7 @@
 
 require_relative "cops/specify_low_queue_in_migration"
 require_relative "cops/active-record/update_attribute"
+require_relative "cops/active-record/no_active_record_in_worker"
 require_relative "cops/active-record/no_active_record_rollback_raise"
 require_relative "cops/active-record/no_transaction_on_add_index_migration"
 require_relative "cops/active-record/save_bang"
